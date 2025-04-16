@@ -12,13 +12,47 @@ from pygame.locals import *
 from src.globalUtilsFunctions import update_vertical_acceleration
 import random
 from gale.input_handler import InputHandler, InputData
+import pytmx
 
+# Inicializamos pygame
+pygame.init()
+
+class TileMap:
+    def __init__(self,levelMap):
+        self.map = settings.LEVELS[levelMap]
+        self.width = self.map.width * self.map.tilewidth
+        self.height = self.map.height * self.map.tileheight
+        self.tmx_data = self.map
+    
+    def render(self,surface):
+        tile_map = self.tmx_data.get_tile_image_by_gid
+        for layer in self.tmx_data.visible_layers:
+            if isinstance(layer, pytmx.TiledTileLayer):
+                for x, y, gid in layer:
+                    tile = tile_map(gid)
+                    if tile:
+                        surface.blit(tile, (x * self.tmx_data.tilewidth, 
+                                                      y * self.tmx_data.tileheight))
+
+    def make_map(self):
+        temp_surface = pygame.Surface((self.width, self.height))
+        self.render(temp_surface)
+        return temp_surface
+        
+        
 class Game:
     def __init__(self):
-        pygame.init()
+
+        # Cargamos el nivel que queremos en el tilemap
+        self.current_tile_map = TileMap("intro")
+        self.map_image = self.current_tile_map.make_map()
+        self.map_rect = self.map_image.get_rect()
+        #Fin de cracion de mapa
+
         self.screen = pygame.display.set_mode(
             (settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)
         )
+
         pygame.display.set_caption("King Animation")
         self.clock = pygame.time.Clock()
         self.attack_moveset = {}
@@ -48,8 +82,8 @@ class Game:
 
         # Variables del personaje
         # Posicion donde empezara el knight
-        self.x = settings.WINDOW_WIDTH // 2
-        self.y = settings.WINDOW_HEIGHT // 2
+        self.x = 5
+        self.y = settings.WINDOW_HEIGHT//2 +275
 
         # Aqui controlamos si va a izquierda o derecha
         self.direction = 1
@@ -241,7 +275,7 @@ class Game:
 
     def draw(self):
         self.screen.fill((0, 0, 0))
-
+        self.screen.blit(self.map_image, (0, settings.WINDOW_HEIGHT - self.map_image.get_height()))
         # Obtener el frame actual
         if self.attacking:
             attack_frames = self.attack_moveset[f"attack{self.current_combo}"]
@@ -263,9 +297,9 @@ class Game:
         self.screen.blit(current_surface, (self.x, self.y))
 
         # Dibujar el rectángulo de colisión
-        pygame.draw.rect(
-            self.screen, (255, 0, 0), self.king_rect, 2
-        )  # Cambié el color a rojo para mejor visibilidad
+        # pygame.draw.rect(
+        #     self.screen, (255, 0, 0), self.king_rect, 2
+        # ) 
 
         pygame.display.flip()
 

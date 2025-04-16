@@ -12,7 +12,7 @@ import pygame
 
 from gale import frames
 from gale import input_handler
-
+import pytmx
 # from src import loaders
 
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_ESCAPE, "quit")
@@ -27,12 +27,13 @@ input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
 input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "jump")
 
 pygame.mixer.init()
+pygame.init()
 
 # Dimensiones de la ventana
 VIRTUAL_WIDTH = 1020
 VIRTUAL_HEIGHT = 740
-WINDOW_WIDTH = VIRTUAL_WIDTH 
-WINDOW_HEIGHT = VIRTUAL_HEIGHT 
+WINDOW_WIDTH = 1280
+WINDOW_HEIGHT = 720
 
 SCALE_FACTOR = 2
 
@@ -48,14 +49,20 @@ BASE_DIR = pathlib.Path(__file__).parent
 king_width = 128
 king_height = 70   
 
+
+
 COLLISION_WIDTH = king_width
 COLLISION_HEIGHT = 70
-
+pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 # king_width_attack = 130
 # king_height_attack = 70
 
 # scaled_surface = pygame.transform.scale(surface, (frame_king.width * 2, frame_king.height * 2))
 # Cargar texturas
+
+LEVELS = {
+    "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "introLevel.tmx", pixelalpha=True),
+}
 
 SOUNDS = {
     "jump": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "jump.wav"),
