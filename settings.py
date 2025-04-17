@@ -31,7 +31,7 @@ pygame.init()
 
 # Dimensiones de la ventana
 VIRTUAL_WIDTH = 1020
-VIRTUAL_HEIGHT = 740
+VIRTUAL_HEIGHT = 500
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
@@ -39,7 +39,7 @@ SCALE_FACTOR = 2
 
 # Configuración del jugador
 PLAYER_SPEED = 150
-
+PLAYER_SPEED_JUMP = -10
 # Rutas y recursos
 BASE_DIR = pathlib.Path(__file__).parent
 
@@ -47,18 +47,18 @@ BASE_DIR = pathlib.Path(__file__).parent
 # height significa el alto de la imagen
 
 king_width = 128
-king_height = 70   
-
-
-
+king_height = 70  
+ 
 COLLISION_WIDTH = king_width
-COLLISION_HEIGHT = 70
-pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-# king_width_attack = 130
-# king_height_attack = 70
+COLLISION_HEIGHT = king_height
+GRAVITY = 0.5
 
-# scaled_surface = pygame.transform.scale(surface, (frame_king.width * 2, frame_king.height * 2))
-# Cargar texturas
+ANIMATIONS_DELAYS = {"run": 100, "attack": 150, "jump": 100, "idle": 200}
+
+
+pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+
+
 
 LEVELS = {
     "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "introLevel.tmx", pixelalpha=True),
@@ -69,24 +69,27 @@ SOUNDS = {
     "timer": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "timer.wav"),
     "count": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "count.wav"),
     "win": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "win.wav"),
-    "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "DreadMarch.wav"),
+    # "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "DreadMarch.wav"),
     "slash1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash1.wav"),
     "slash2": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash2.wav"),
+    "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "EclipsedDesolation.wav"),
 }
 
 TEXTURES = {
-    "martian": pygame.image.load(BASE_DIR / "assets" / "textures" / "martian.png"),
     "kingRun": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingRun.png"),
     "kingAttack": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingAttacks.png"),
     "kingJump": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingJump.png"),
+    "fireplace": pygame.image.load(BASE_DIR / "assets" / "textures" / "fireplace.png"),
+    "torch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch.png"),
 }
 
 # Generar frames del sprite
 FRAMES = {
-    "martian": frames.generate_frames(TEXTURES["martian"], 16, 20), 
-    "kingRun": frames.generate_frames(TEXTURES["kingRun"], king_width - 2, king_height),        
+    "kingRun":  frames.generate_frames(TEXTURES["kingRun"], king_width - 2, king_height),        
     "kingAttack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height),
     "kingJump": frames.generate_frames(TEXTURES["kingJump"], king_width, king_height),
+    "fireplace": frames.generate_frames(TEXTURES["fireplace"], 64, 64),
+    "torch": frames.generate_frames(TEXTURES["torch"], 64, 64),
 }
 
 # Inicializar fuentes
