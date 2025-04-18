@@ -15,16 +15,16 @@ from gale import input_handler
 import pytmx
 # from src import loaders
 
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_ESCAPE, "quit")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_p, "pause")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RETURN, "enter")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_KP_ENTER, "enter")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RIGHT, "move_right")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_d, "move_right")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_LEFT, "move_left")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_a, "move_left")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
-input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "jump")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_ESCAPE, "quit")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_p, "pause")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RETURN, "enter")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_KP_ENTER, "enter")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RIGHT, "move_right")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_d, "move_right")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_LEFT, "move_left")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_a, "move_left")
+# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
+# input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "jump")
 
 pygame.mixer.init()
 pygame.init()
@@ -34,12 +34,12 @@ VIRTUAL_WIDTH = 1020
 VIRTUAL_HEIGHT = 500
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
-
 SCALE_FACTOR = 2
 
 # Configuración del jugador
 PLAYER_SPEED = 150
 PLAYER_SPEED_JUMP = -10
+
 # Rutas y recursos
 BASE_DIR = pathlib.Path(__file__).parent
 
@@ -75,21 +75,36 @@ SOUNDS = {
     "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "EclipsedDesolation.wav"),
 }
 
+# Generar textura del spritesheet
 TEXTURES = {
     "kingRun": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingRun.png"),
     "kingAttack": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingAttacks.png"),
     "kingJump": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingJump.png"),
+    "idle": pygame.image.load(BASE_DIR / "assets" / "textures" / "idle.png"),
     "fireplace": pygame.image.load(BASE_DIR / "assets" / "textures" / "fireplace.png"),
     "torch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch.png"),
 }
 
 # Generar frames del sprite
 FRAMES = {
-    "kingRun":  frames.generate_frames(TEXTURES["kingRun"], king_width - 2, king_height),        
-    "kingAttack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height),
-    "kingJump": frames.generate_frames(TEXTURES["kingJump"], king_width, king_height),
+    "kingRun":  frames.generate_frames(TEXTURES["kingRun"], king_width - 2, king_height - 6),        
+    "kingAttack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height - 6),
+    "kingJump": frames.generate_frames(TEXTURES["kingJump"], king_width, king_height - 6),
+    "idle": frames.generate_frames(TEXTURES["idle"], king_width , king_height - 6),
     "fireplace": frames.generate_frames(TEXTURES["fireplace"], 64, 64),
     "torch": frames.generate_frames(TEXTURES["torch"], 64, 64),
+}
+
+ANIMATED_DECORATIONS = {
+    "fireplace" : {
+        "texture" : TEXTURES["fireplace"] ,
+        "frames" : FRAMES["fireplace"] 
+    },
+    "torch" : {
+        "texture" : TEXTURES["torch"] ,
+        "frames" : FRAMES["torch"]   
+    }
+    
 }
 
 # Inicializar fuentes

@@ -1,3 +1,5 @@
+import pygame
+
 def update_vertical_acceleration(vertical_velocity, gravity , y , ground_y , vertical_movement):
     if vertical_movement:
         vertical_velocity += gravity

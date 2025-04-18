@@ -17,41 +17,42 @@ import src.Player as Player
 import src.Camera as Camera
 import src.AnimatedItem as AnimatedItem
 import math
+import src.TileMap as TileMap
 
 # Inicializamos pygame
 pygame.init()
 
-class TileMap:
-    def __init__(self, levelMap):
-        self.map = settings.LEVELS[levelMap]
-        self.width = self.map.width * self.map.tilewidth
-        self.height = self.map.height * self.map.tileheight
-        self.tmx_data = self.map
+# class TileMap:
+#     def __init__(self, levelMap):
+#         self.map = settings.LEVELS[levelMap]
+#         self.width = self.map.width * self.map.tilewidth
+#         self.height = self.map.height * self.map.tileheight
+#         self.tmx_data = self.map
 
-    def render(self, surface):
-        tile_map = self.tmx_data.get_tile_image_by_gid
-        for layer in self.tmx_data.visible_layers:
-            if isinstance(layer, pytmx.TiledTileLayer):
-                for x, y, gid in layer:
-                    tile = tile_map(gid)
-                    if tile:
-                        surface.blit(tile, (x * self.tmx_data.tilewidth,
-                                            y * self.tmx_data.tileheight))
+#     def render(self, surface):
+#         tile_map = self.tmx_data.get_tile_image_by_gid
+#         for layer in self.tmx_data.visible_layers:
+#             if isinstance(layer, pytmx.TiledTileLayer):
+#                 for x, y, gid in layer:
+#                     tile = tile_map(gid)
+#                     if tile:
+#                         surface.blit(tile, (x * self.tmx_data.tilewidth,
+#                                             y * self.tmx_data.tileheight))
 
-    def make_map(self):
-        # Crear una superficie temporal con las dimensiones originales del tilemap
-        temp_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        self.render(temp_surface)
+#     def make_map(self):
+#         # Crear una superficie temporal con las dimensiones originales del tilemap
+#         temp_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+#         self.render(temp_surface)
         
-        # Calcular el factor de escala para ajustar el tilemap al alto virtual de la pantalla
-        scale_factor = settings.VIRTUAL_HEIGHT / self.height
+#         # Calcular el factor de escala para ajustar el tilemap al alto virtual de la pantalla
+#         scale_factor = settings.VIRTUAL_HEIGHT / self.height
 
-        # Escalar el tilemap
-        scaled_width = int(self.width * scale_factor)
-        scaled_height = int(self.height * scale_factor)
-        scaled_surface = pygame.transform.smoothscale(temp_surface, (scaled_width, scaled_height))
+#         # Escalar el tilemap
+#         scaled_width = int(self.width * scale_factor)
+#         scaled_height = int(self.height * scale_factor)
+#         scaled_surface = pygame.transform.smoothscale(temp_surface, (scaled_width, scaled_height))
 
-        return scaled_surface
+#         return scaled_surface
         
 class Game:
     def __init__(self):
@@ -69,7 +70,7 @@ class Game:
         # Inicializamos la posicion del jugador
         self.player_x, self.player_y = 0, 0
         
-        # Inicializar la camara con el tamaño del mundo
+        # Inicializar la camara con el tamaño del mundo , para que la camara tenga el tama;o del tilemap y se mueva encima de el
         self.camera = Camera()
         self.camera.set_world_size(self.map_image.get_width(), self.map_image.get_height())
 
@@ -83,22 +84,47 @@ class Game:
         #Animacion de frames de la fogata
         self.fireanimations = []
         
-        spritesheet = settings.TEXTURES["fireplace"]  # Asegúrate de que esta sea la textura del spritesheet
-        print(spritesheet)
-        for frame in settings.FRAMES["fireplace"]:
-            surface = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
-            surface.blit(spritesheet, (0, 0), frame)
-            self.fireanimations.append(surface)
-        
-        self.torchanimations = []
-        spritesheet1 = settings.TEXTURES["torch"]  # Asegúrate de que esta sea la textura del spritesheet
 
-        for frame1 in settings.FRAMES["torch"]:
-            # Crear una superficie del tamaño del frame
-            surface = pygame.Surface((frame1.width, frame1.height), pygame.SRCALPHA)
-            # Recortar el frame del spritesheet
-            surface.blit(spritesheet1, (0, 0), frame1)
-            self.torchanimations.append(surface)
+        self.object_animations = {}
+
+        for spritesheet_name , spritesheet_data in settings.ANIMATED_DECORATIONS.items():
+            
+            print(spritesheet_name)
+            # Obtenemos la textura y los frames de la animacion del objeto
+            spritesheet = spritesheet_data["texture"]
+            frames = spritesheet_data["frames"]
+            
+            # Crear una lista para almacenar las superficies de animación
+            animation_frames = []
+            
+            for frame in frames:
+                # Crea una superficie para el frame
+                surface = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
+                # Recorta el frame 
+                surface.blit(spritesheet, (0, 0), frame)
+                # Vamos guardando en la lista los frames de la animacion
+                animation_frames.append(surface)
+            
+            self.object_animations[spritesheet_name] = animation_frames
+            
+     
+        # Metodo manual lo deje porsiaca
+        # spritesheet = settings.TEXTURES["fireplace"] 
+
+        # for frame in settings.FRAMES["fireplace"]:
+        #     surface = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
+        #     surface.blit(spritesheet, (0, 0), frame)
+        #     self.fireanimations.append(surface)
+        
+        # self.torchanimations = []
+        # spritesheet1 = settings.TEXTURES["torch"] 
+
+        # for frame1 in settings.FRAMES["torch"]:
+        #     # Crear una superficie del tamaño del frame
+        #     surface = pygame.Surface((frame1.width, frame1.height), pygame.SRCALPHA)
+        #     # Recortar el frame del spritesheet
+        #     surface.blit(spritesheet1, (0, 0), frame1)
+        #     self.torchanimations.append(surface)
             
         for objects in self.current_tile_map.tmx_data.objects:
             
@@ -116,27 +142,27 @@ class Game:
                 self.solid_objects.append(solid_rect)
                 
             if objects.name == "fireplace":
-                # Crear un objeto animado para la fogata
-                    # Posiciones reecaladas
+                # Crear un objeto animado para la fireplace
+                    # Posiciones reescaladas
                     # Array con animaciones
                     # Timpo entre frames
-                fogata = AnimatedItem(
+                fireplace = AnimatedItem(
                     objects.x * scale_factor,
                     objects.y * scale_factor,
-                    self.fireanimations,  
+                    self.object_animations[objects.name],  
                     animation_delay=150  
                 )
-                self.animated_items.append(fogata)
+                self.animated_items.append(fireplace)
                 
             if objects.name == "torch":
                 # Crear un objeto animado para la fogata
-                    # Posiciones reecaladas
+                    # Posiciones reescaladas
                     # Array con animaciones
                     # Timpo entre frames
                 torch = AnimatedItem(
                     objects.x * scale_factor,
                     objects.y * scale_factor,
-                    self.torchanimations,  
+                    self.object_animations[objects.name],    
                     animation_delay=150  
                 )
                 self.animated_items.append(torch)
