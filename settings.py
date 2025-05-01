@@ -13,18 +13,19 @@ import pygame
 from gale import frames
 from gale import input_handler
 import pytmx
+import os
 # from src import loaders
 
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_ESCAPE, "quit")
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_p, "pause")
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RETURN, "enter")
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_KP_ENTER, "enter")
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RIGHT, "move_right")
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_d, "move_right")
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_LEFT, "move_left")
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_a, "move_left")
-# input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
-# input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "jump")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_ESCAPE, "quit")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_p, "pause")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RETURN, "enter")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_KP_ENTER, "enter")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RIGHT, "move_right")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_d, "move_right")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_LEFT, "move_left")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_a, "move_left")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
+input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "jump")
 
 pygame.mixer.init()
 pygame.init()
@@ -32,8 +33,15 @@ pygame.init()
 # Dimensiones de la ventana
 VIRTUAL_WIDTH = 1020
 VIRTUAL_HEIGHT = 500
-WINDOW_WIDTH = 1280
-WINDOW_HEIGHT = 720
+
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 450
+
+# Dimensiones de la ventana
+os.environ['SDL_VIDEO_WINDOW_POS'] = f"{WINDOW_WIDTH//4},{WINDOW_HEIGHT//4}"
+pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption("Lost Kingdom")
+
 SCALE_FACTOR = 2
 
 # Configuración del jugador
@@ -46,18 +54,17 @@ BASE_DIR = pathlib.Path(__file__).parent
 # width significa el ancho de la imagen
 # height significa el alto de la imagen
 
+# Estos son los valores de la textura del player para recortar el ancho y alto del sprite
+# el ancho y alto de la textura del player
 king_width = 128
 king_height = 70  
+
  
 COLLISION_WIDTH = king_width
 COLLISION_HEIGHT = king_height
 GRAVITY = 0.5
 
 ANIMATIONS_DELAYS = {"run": 100, "attack": 150, "jump": 100, "idle": 200}
-
-
-pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-
 
 
 LEVELS = {
@@ -83,6 +90,7 @@ TEXTURES = {
     "idle": pygame.image.load(BASE_DIR / "assets" / "textures" / "idle.png"),
     "fireplace": pygame.image.load(BASE_DIR / "assets" / "textures" / "fireplace.png"),
     "torch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch.png"),
+    "background_layer_1": pygame.image.load(BASE_DIR / "assets" / "textures" / "background_layer_1.png"),
 }
 
 # Generar frames del sprite
