@@ -17,16 +17,17 @@ import os
 # from src import loaders
 
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_ESCAPE, "quit")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_p, "pause")
+
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RETURN, "enter")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_KP_ENTER, "enter")
+
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_RIGHT, "move_right")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_d, "move_right")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_LEFT, "move_left")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_a, "move_left")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
-input_handler.InputHandler.set_mouse_click_action(input_handler.MOUSE_BUTTON_1, "jump")
-
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_x, "x")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_p, "pause")
 pygame.mixer.init()
 pygame.init()
 
@@ -34,8 +35,8 @@ pygame.init()
 VIRTUAL_WIDTH = 1020
 VIRTUAL_HEIGHT = 500
 
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 450
+WINDOW_WIDTH = 1020
+WINDOW_HEIGHT = 500
 
 # Dimensiones de la ventana
 os.environ['SDL_VIDEO_WINDOW_POS'] = f"{WINDOW_WIDTH//4},{WINDOW_HEIGHT//4}"
@@ -59,16 +60,19 @@ BASE_DIR = pathlib.Path(__file__).parent
 king_width = 128
 king_height = 70  
 
+enemy1_width = 80
+enemy1_height = 80
  
 COLLISION_WIDTH = king_width
 COLLISION_HEIGHT = king_height
 GRAVITY = 0.5
 
-ANIMATIONS_DELAYS = {"run": 100, "attack": 150, "jump": 100, "idle": 200}
+ANIMATIONS_DELAYS = {"run": 100, "attack": 250, "jump": 300, "idle": 90}
 
 
 LEVELS = {
-    "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "introLevel.tmx", pixelalpha=True),
+    # "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "introLevel.tmx", pixelalpha=True),
+    "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "levelTest.tmx", pixelalpha=True),
 }
 
 SOUNDS = {
@@ -80,6 +84,7 @@ SOUNDS = {
     "slash1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash1.wav"),
     "slash2": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash2.wav"),
     "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "EclipsedDesolation.wav"),
+    "menu_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "CursedCitadel(Intro).wav"),
 }
 
 # Generar textura del spritesheet
@@ -88,20 +93,102 @@ TEXTURES = {
     "kingAttack": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingAttacks.png"),
     "kingJump": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingJump.png"),
     "idle": pygame.image.load(BASE_DIR / "assets" / "textures" / "idle.png"),
+    
+    
+    "enemyAnimations": pygame.image.load(BASE_DIR / "assets" / "textures" / "NightBorne.png"),
+    
     "fireplace": pygame.image.load(BASE_DIR / "assets" / "textures" / "fireplace.png"),
     "torch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch.png"),
-    "background_layer_1": pygame.image.load(BASE_DIR / "assets" / "textures" / "background_layer_1.png"),
+    "castleTorch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch_big" / "castleTorch.png"),
+    
+    
+    "menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "menu.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
+}
+
+
+# Generar textura del spritesheet
+COMPLEX_TEXTURES = {
+    "Player":{
+        "Run": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingRun.png"),
+        "Attack": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingAttacks.png"),
+        "Jump": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingJump.png"),
+    },
+    
+    "NightBorne":{
+        "NightBorne": pygame.image.load(BASE_DIR / "assets" / "textures" / "NightBorne.png"),
+    },
+    
+    "Golem":{
+        "Idle": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" /"Golem_IdleB.png"),
+        "Run": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" /"Golem_Run.png"),
+        "Attack": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" / "Golem_AttackC.png"),
+    },
+  
+}
+
+# AQUI MANEJAMOS EL ANALISIS PARA ENEMIGOS Y JUGADORES PERO UN POQUITO MAS COMPLEJO
+# YA QUE QUEREMOS QUE PUEDA ANALIZAR TODO UN SPRITESHEET DE TODOS LOS MOVIMIENTOS
+# O UN SPTRITESHEET DE UN SOLO MOVIMIENTO , COMO POR EJEMPLO EL DE PLAYER
+
+COMPLEX_FRAMES = {
+    "Player":{
+        "Run":  frames.generate_frames(TEXTURES["kingRun"], king_width , king_height - 6),        
+        "Attack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height - 6),
+        "Jump": frames.generate_frames(TEXTURES["kingJump"], king_width, king_height - 6),
+    },
+    
+    "NightBorne":{
+        "NightBorne": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width, enemy1_height),
+    },
+    
+    "Golem":{
+        "Idle":  frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Idle"], 64 , 64),  
+        "Run":  frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Run"], 64 , 64),        
+        "Attack": frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Attack"], 64 , 64),
+    },
+  
 }
 
 # Generar frames del sprite
 FRAMES = {
-    "kingRun":  frames.generate_frames(TEXTURES["kingRun"], king_width - 2, king_height - 6),        
+    "kingRun":  frames.generate_frames(TEXTURES["kingRun"], king_width , king_height - 6),        
     "kingAttack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height - 6),
     "kingJump": frames.generate_frames(TEXTURES["kingJump"], king_width, king_height - 6),
+    
+    "enemyAnimations": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width, enemy1_height),
+    
     "idle": frames.generate_frames(TEXTURES["idle"], king_width , king_height - 6),
     "fireplace": frames.generate_frames(TEXTURES["fireplace"], 64, 64),
-    "torch": frames.generate_frames(TEXTURES["torch"], 64, 64),
+    "torch": frames.generate_frames(TEXTURES["torch"], 64, 64),  
+    "castleTorch": frames.generate_frames(TEXTURES["castleTorch"], 12, 42),
+    
+    # "enemyIdle": frames.generate_frames(TEXTURES["idle"], king_width , king_height - 6),
+    # "enemyMove": frames.generate_frames(TEXTURES["kingRun"], king_width - 2, king_height - 6),
+    # "enemyAttack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height - 6),
 }
+
+
+
+ANIMATIONS_ENEMY_DELAYS = {
+    "NightBorne": {
+        "idle": 80,
+        "run": 80,
+        "attack": 50,
+    },
+    "Golem": {
+        "idle": 80,
+        "run": 80,
+        "attack": 50,
+    },
+}
+
+ENEMYFRAMES = {
+    "enemyIdle": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width , enemy1_height - 6),
+    "enemyMove": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width - 2, enemy1_height - 6),
+    "enemyAttack": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width , enemy1_height - 6),
+}
+
+ENEMY_SPEED = 100
 
 ANIMATED_DECORATIONS = {
     "fireplace" : {
@@ -111,9 +198,15 @@ ANIMATED_DECORATIONS = {
     "torch" : {
         "texture" : TEXTURES["torch"] ,
         "frames" : FRAMES["torch"]   
+    },
+    "castleTorch" : {
+        "texture" : TEXTURES["castleTorch"] ,
+        "frames" : FRAMES["castleTorch"]   
     }
     
 }
+
+
 
 # Inicializar fuentes
 pygame.font.init()

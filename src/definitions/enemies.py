@@ -1,0 +1,59 @@
+
+import settings
+import pygame
+
+# Aqui vamos a definir la estadistica de los enemigos, ya que tendremos varios y debemos simplificar el proceso para el anexo data de cada uno de ellos
+# Estos datos los vamos a usar en la clase ENEMY 
+
+Enemies = {
+    "NightBorne":{
+            "speed": settings.ENEMY_SPEED,
+            "delay": settings.ANIMATIONS_ENEMY_DELAYS,
+            "position_x_correct": 0,
+            "base_rect_width": 25,
+            "base_rect_height": 45,
+            "enemy_rect_offset_x": 22 , 
+            "enemy_rect_offset_y": -45,
+            "attack_rect_width": 60,
+            "extra_custom_offset_y": -60,
+            "scale_factor": 1.6,
+            "max_health": 100,
+            "attack_range": 60,
+            "detection_range": 200,
+            "attack_damage": 10,
+            "floor_correct": 40,
+        },
+    "Golem":{
+            "speed": settings.ENEMY_SPEED,
+            "delay": settings.ANIMATIONS_ENEMY_DELAYS,
+            
+            # Correccion de posicion en x , ya que manejamos escalas distintas entonces nos ayuda a centrar a nuestro enemigo
+            "position_x_correct": 100,
+            
+            # Tama;o base ancho y alto del rectangulo de colision del enemigo
+            "base_rect_width": 50,
+            "base_rect_height": 45,
+            
+            # Tama;os para los offset del rectangulo de colision (acomodar su posicion inicial en el sprite del enemigo y se vea mas acorde)
+            "enemy_rect_offset_x": 70 , 
+            "enemy_rect_offset_y": -45,
+            
+            # Agranda el rectangulo de colision para los ataques fisicos
+            "attack_rect_width": 70,
+            
+            # Correccion extra para la posicion en y , para acomodar el sprite del enemigo en Y
+            "extra_custom_offset_y": -60,
+            
+            # Factor de escalado entre mayor el numero mas grande se crea el sprite
+            "scale_factor": 3,
+            
+            # Datos base del enemigo
+            "max_health": 200,
+            "attack_range": 60,
+            "detection_range": 200,
+            "attack_damage": 30,
+            
+            # Correcion en la posicion del piso base del enemigo para que no cambie segun su rectangulo de colision
+            "floor_correct": 70,
+        }
+}

@@ -27,12 +27,12 @@ class Game:
     
     def __init__(self):
         
-         # Lista para almacenar máscaras
-        self.masks = []
+        #  # Lista para almacenar máscaras
+        # self.masks = []
 
-        # Ejemplo: Cargar una máscara desde los assets
-        mask_image = pygame.image.load(settings.BASE_DIR / "assets" / "textures" / "background_layer_3.png").convert_alpha()
-        self.masks.append({"image": mask_image, "position": (500, 300)})  # Posición fija como ejemplo
+        # # Ejemplo: Cargar una máscara desde los assets
+        # mask_image = pygame.image.load(settings.BASE_DIR / "assets" / "textures" / "background_layer_3.png").convert_alpha()
+        # self.masks.append({"image": mask_image, "position": (500, 300)})  # Posición fija como ejemplo
         
         # Inicializamos el reloj    
         self.clock = pygame.time.Clock()
@@ -156,8 +156,21 @@ class Game:
              
     def handle_inputs(self):
         keys = pygame.key.get_pressed()
-        delta_time = self.clock.get_time()
-        self.player.handle_inputs(keys,delta_time)
+        key = 0
+        if keys[pygame.K_SPACE] :
+            key = "jump"
+        elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+            key = "move_left"
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+            key = "move_right"
+        elif keys[pygame.K_x]:
+            key = "x"
+        elif keys[pygame.K_ESCAPE]: 
+            key = "quit"
+        
+        delta_time = self.clock.get_time() 
+        print(delta_time)
+        self.player.handle_inputs(key,delta_time)
 
     def update(self):
         delta_time = self.clock.get_time()
@@ -172,8 +185,8 @@ class Game:
 
         self.screen.fill((0, 0, 0))
         # Dibujar las máscaras por encima de todo
-        for mask in self.masks:
-            self.screen.blit(mask["image"], mask["position"])
+        # for mask in self.masks:
+        #     self.screen.blit(mask["image"], mask["position"])
         # Dibujamos el mapa con offset de cámara
         map_pos = (-self.camera.offset_x, -self.camera.offset_y)
         self.screen.blit(self.map_image, map_pos)

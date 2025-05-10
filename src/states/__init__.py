@@ -2,6 +2,8 @@
 
 from src.states.PlayState import PlayState
 from src.states.MenuState import MenuState
+from src.states.VideoState import VideoState
+from src.states.PauseState import PauseState
+from src.states.GameOverState import GameOverState
 
-
-(PlayState,MenuState)
+(PlayState,MenuState,VideoState,PauseState,GameOverState)

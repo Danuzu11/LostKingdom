@@ -13,19 +13,21 @@ class LostKindom(Game):
     def init(self) -> None:
         self.state_machine = StateMachine(
             {
+                "video": states.VideoState,
                 "play": states.PlayState,
                 "menu": states.MenuState,
+                "pause": states.PauseState,
+                "game_over": states.GameOverState,
             }
         )
-        self.state_machine.change("menu")
-        # pygame.mixer_music.load(settings.BASE_DIR / "assets" / "sounds" / "music.ogg")
-        # pygame.mixer_music.play(loops=-1)
-
+        self.state_machine.change("play")       
+        # settings.SOUNDS["principal_theme"].play(loops=-1)
+        
     def update(self, dt: float) -> None:
         self.state_machine.update(dt)
 
     def render(self, surface: pygame.Surface) -> None:
-        surface.blit(settings.TEXTURES["background_layer_1"], (0, 0))
+        # surface.blit(settings.TEXTURES["menu"], (0, 0))
         self.state_machine.render(surface)
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
