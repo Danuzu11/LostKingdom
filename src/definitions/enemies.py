@@ -9,19 +9,33 @@ Enemies = {
     "NightBorne":{
             "speed": settings.ENEMY_SPEED,
             "delay": settings.ANIMATIONS_ENEMY_DELAYS,
-            "position_x_correct": 0,
+            
+            # Correcion de la posicion inicial en x
+            "position_x_correct": 80,
             "base_rect_width": 25,
             "base_rect_height": 45,
-            "enemy_rect_offset_x": 22 , 
+            
+            # Coreccion de las posiciones del rectangulo de colision del enemigo
+            "enemy_rect_offset_x": 50 , 
             "enemy_rect_offset_y": -45,
+            
+            "floor_correct": 40,
+            
+            # Tama;os para los offset del rectangulo de colision (acomodar su posicion inicial en el sprite del enemigo y se vea mas acorde)
             "attack_rect_width": 60,
+            # Correccion extra para la posicion en y , para acomodar el sprite del enemigo en Y
             "extra_custom_offset_y": -60,
+            
             "scale_factor": 1.6,
             "max_health": 100,
             "attack_range": 60,
-            "detection_range": 200,
+            "detection_range": 100,
             "attack_damage": 10,
-            "floor_correct": 40,
+            
+            # Corecccion de la barra de vida del enemigo
+            "health_bar_offset_x": 40,   
+            "health_bar_offset_y": 0,
+   
         },
     "Golem":{
             "speed": settings.ENEMY_SPEED,
@@ -39,7 +53,7 @@ Enemies = {
             "enemy_rect_offset_y": -45,
             
             # Agranda el rectangulo de colision para los ataques fisicos
-            "attack_rect_width": 70,
+            "attack_rect_width": 60,
             
             # Correccion extra para la posicion en y , para acomodar el sprite del enemigo en Y
             "extra_custom_offset_y": -60,
@@ -55,5 +69,9 @@ Enemies = {
             
             # Correcion en la posicion del piso base del enemigo para que no cambie segun su rectangulo de colision
             "floor_correct": 70,
+            
+            # Correcccion de la barra de vida del enemigo
+            "health_bar_offset_x": 0,   
+            "health_bar_offset_y": 0,
         }
 }

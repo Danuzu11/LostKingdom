@@ -9,7 +9,7 @@ class VideoState(BaseState):
         """
         Se ejecuta al entrar en el estado.
         """
-        self.video_path = "assets/video/intro1.mp4"  # Ruta del video
+        self.video_path = "assets/video/intro2.mp4"  # Ruta del video
         self.screen = params.get("screen")
         self.video = VideoFileClip(self.video_path)
 
@@ -25,9 +25,6 @@ class VideoState(BaseState):
         pygame.mixer.music.play(-1)
         
     def update(self, dt: float):
-        """
-        Actualiza la lógica del estado.
-        """
         if not self.video_finished:
             try:
                 # Obtener el siguiente frame del video

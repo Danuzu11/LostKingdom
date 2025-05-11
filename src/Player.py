@@ -25,6 +25,7 @@ class Player:
         self.knockback_speed = 100 
         self.hurt_frame = 0  # Usaremos el primer frame de "jump" como frame de herido
 
+        # Variables de ataque, y generar coldown entre ataques
         self.attack_windup = 400  # ms antes de atacar
         self.attack_windup_timer = 0
         self.attack_recovery = 300  # ms despues de atacar
@@ -34,7 +35,7 @@ class Player:
 
         # Inicalizamos todas las variabales que usara nuestro jugadorsito
         
-        self.offset_positiony = 60
+        
         # Variables de posicion
         self.x = x - 10
         self.y = y - 20
@@ -110,12 +111,13 @@ class Player:
         self.pos_player_rectX = self.x + self.rect_offset_x
         self.pos_player_rectY = self.y + self.rect_offset_y
         
-
-   
+        # correccion de la posicion en y del jugador para que quede en el piso
+        self.offset_positiony = 15
+        # self.offset_positiony = self.y
         # Ahora, la posición inicial del jugador debe considerar el nuevo offset
         self.x = x - 10
-        self.y = y - self.offset_positiony
-
+        self.y = self.y - self.offset_positiony
+        # print(self.y)
         # Inicializar el rectángulo de colision del jugador
         self.king_rect = pygame.Rect(
             self.pos_player_rectX,
@@ -206,7 +208,7 @@ class Player:
         self.animation_timer += delta_time 
     
 
-        # Si está herido, aplicar knockback y controlar invulnerabilidad
+        # Si esta herido, aplicar knockback y controlar invulnerabilidad
         if self.hurt:
             # self.x += self.knockback_direction * self.knockback_speed * (delta_time / 1000)
             self.apply_knockback(delta_time, solid_objects)
@@ -225,12 +227,12 @@ class Player:
         if self.current_state == "idle" or self.current_state == "run":
             # Verificar si hay suelo debajo antes de aplicar gravedad
             is_on_ground = self.check_ground(solid_objects)
-            
+     
             # Si no hay suelo debajo y no estamos saltando, comenzar a caer, aplicando caida libre
             if not is_on_ground and not self.jumping:
                 self.on_ground = False
                 
-            # Si no hay colisión con el suelo, aplicar "gravedad"
+            # # Si no hay colisión con el suelo, aplicar "gravedad"
             if not self.on_ground:
                 self.vertical_velocity += settings.GRAVITY  # Aceleración constante hacia abajo
                 self.y += self.vertical_velocity
@@ -272,10 +274,10 @@ class Player:
         else:
             self.combo_timer = 0
             
-        # Actualizar tamaño del rectángulo de colision, dependiendo de si esta atacando o no
+        # Actualizar tamaño del rectangulo de colision, dependiendo de si esta atacando o no
         rect_width = self.attack_rect_width if self.attacking else self.base_rect_width
         
-        # Actualizar posicion del rectángulo de colisión
+        # Actualizar posicion del rectangulo de colisión
         if self.direction == 1:
             rect_x = self.x + self.rect_offset_x * 2 
         else:
@@ -344,17 +346,17 @@ class Player:
         # Dibujar el rectángulo de colisión (para depuración)
        # Dibujar el rectángulo de colisión (para depuración)
         # Ajusta la posición del rectángulo según el offset de la cámara
-        rect_draw_x = self.king_rect.x
-        rect_draw_y = self.king_rect.y
-        if camera_offset:
-            rect_draw_x = self.king_rect.x - self.x + x
-            rect_draw_y = self.king_rect.y - self.y + y
-        pygame.draw.rect(
-            screen,
-            (255, 0, 0),  # Color rojo
-            pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
-            2,  # Grosor de la línea
-        )
+        # rect_draw_x = self.king_rect.x
+        # rect_draw_y = self.king_rect.y
+        # if camera_offset:
+        #     rect_draw_x = self.king_rect.x - self.x + x
+        #     rect_draw_y = self.king_rect.y - self.y + y
+        # pygame.draw.rect(
+        #     screen,
+        #     (255, 0, 0),  # Color rojo
+        #     pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
+        #     2,  # Grosor de la línea
+        # )
     
     # METODO AUXILIARES
     # Actuliza el rectangulo de colision de la camara, es decir el rectangulo que se usa para mover la camara
@@ -496,8 +498,8 @@ class Player:
     
     def render_health_bar(self, x,y,screen):
         # Renderizar la barra de salud
-        bar_x = x
-        bar_y = y - 10
+        bar_x = x + self.rect_offset_x + self.base_rect_width 
+        bar_y = y + 5
         
         # Dibujar barra de vida
         health_bar_width = 50

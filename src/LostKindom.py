@@ -20,6 +20,7 @@ class LostKindom(Game):
                 "game_over": states.GameOverState,
             }
         )
+        self.state_machine.game = self
         self.state_machine.change("play")       
         # settings.SOUNDS["principal_theme"].play(loops=-1)
         

@@ -1,6 +1,35 @@
 import pygame
 import settings
 
+def fade(screen, width, height, fade_in=False, duration=500):
+    """
+    Realiza un efecto de fade in o fade out.
+
+    Args:
+        screen: La superficie de la pantalla de Pygame.
+        width: El ancho de la pantalla.
+        height: La altura de la pantalla.
+        fade_in: True para fade in, False para fade out.
+        duration: La duración del efecto en milisegundos.
+    """
+    fade_surface = pygame.Surface((width, height))
+    fade_surface.fill((0, 0, 0))  # Puedes cambiar el color a blanco o el que desees
+    if fade_in:
+        alpha_start, alpha_end = 255, 0
+    else:
+        alpha_start, alpha_end = 0, 255
+
+    steps = 50  # Numero de pasos para el efecto (ajusta para más suavidad o velocidad)
+    delay = duration / steps
+
+    for i in range(steps + 1):
+        alpha = alpha_start + (alpha_end - alpha_start) * i / steps
+        fade_surface.set_alpha(int(alpha))
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.flip()
+        pygame.time.delay(int(delay))
+        
+        
 def update_vertical_acceleration(vertical_velocity, gravity , y , ground_y , vertical_movement):
     if vertical_movement:
         vertical_velocity += gravity

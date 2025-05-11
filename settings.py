@@ -43,11 +43,7 @@ os.environ['SDL_VIDEO_WINDOW_POS'] = f"{WINDOW_WIDTH//4},{WINDOW_HEIGHT//4}"
 pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption("Lost Kingdom")
 
-SCALE_FACTOR = 2
 
-# Configuración del jugador
-PLAYER_SPEED = 150
-PLAYER_SPEED_JUMP = -10
 
 # Rutas y recursos
 BASE_DIR = pathlib.Path(__file__).parent
@@ -57,6 +53,12 @@ BASE_DIR = pathlib.Path(__file__).parent
 
 # Estos son los valores de la textura del player para recortar el ancho y alto del sprite
 # el ancho y alto de la textura del player
+SCALE_FACTOR = 2
+
+# Configuración del jugador
+PLAYER_SPEED = 150
+PLAYER_SPEED_JUMP = -10
+
 king_width = 128
 king_height = 70  
 
@@ -67,7 +69,12 @@ COLLISION_WIDTH = king_width
 COLLISION_HEIGHT = king_height
 GRAVITY = 0.5
 
-ANIMATIONS_DELAYS = {"run": 100, "attack": 250, "jump": 300, "idle": 90}
+ANIMATIONS_DELAYS = {
+    "run": 100, 
+    "attack": 250, 
+    "jump": 300, 
+    "idle": 90
+}
 
 
 LEVELS = {
@@ -83,8 +90,9 @@ SOUNDS = {
     # "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "DreadMarch.wav"),
     "slash1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash1.wav"),
     "slash2": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash2.wav"),
-    "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "EclipsedDesolation.wav"),
-    "menu_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "CursedCitadel(Intro).wav"),
+    "principal_theme1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "EclipsedDesolation.wav"),
+    "menu_theme1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "CursedCitadel(Intro).wav"),
+    "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "smoothMedieval.mp3"),
 }
 
 # Generar textura del spritesheet
@@ -102,7 +110,8 @@ TEXTURES = {
     "castleTorch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch_big" / "castleTorch.png"),
     
     
-    "menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "menu.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
+    #"menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "menu.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
+    "menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "slayer.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
 }
 
 
@@ -138,7 +147,7 @@ COMPLEX_FRAMES = {
     },
     
     "NightBorne":{
-        "NightBorne": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width, enemy1_height),
+        "NightBorne": frames.generate_frames(COMPLEX_TEXTURES["NightBorne"]["NightBorne"], enemy1_width, enemy1_height),
     },
     
     "Golem":{
@@ -182,26 +191,27 @@ ANIMATIONS_ENEMY_DELAYS = {
     },
 }
 
-ENEMYFRAMES = {
-    "enemyIdle": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width , enemy1_height - 6),
-    "enemyMove": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width - 2, enemy1_height - 6),
-    "enemyAttack": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width , enemy1_height - 6),
-}
 
 ENEMY_SPEED = 100
 
 ANIMATED_DECORATIONS = {
     "fireplace" : {
         "texture" : TEXTURES["fireplace"] ,
-        "frames" : FRAMES["fireplace"] 
+        "frames" : FRAMES["fireplace"] ,
+        "correctionX" : 0,
+        "correctionY" : 60,
     },
     "torch" : {
         "texture" : TEXTURES["torch"] ,
-        "frames" : FRAMES["torch"]   
+        "frames" : FRAMES["torch"]   ,
+        "correctionX" : 0,
+        "correctionY" : 0,
     },
     "castleTorch" : {
         "texture" : TEXTURES["castleTorch"] ,
-        "frames" : FRAMES["castleTorch"]   
+        "frames" : FRAMES["castleTorch"] ,
+        "correctionX" : 5,
+        "correctionY" : 40,  
     }
     
 }

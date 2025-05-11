@@ -21,7 +21,7 @@ class TileMap:
         # Sacamos la data del tilemap
         tile_map = self.tmx_data.get_tile_image_by_gid
         for layer in self.tmx_data.visible_layers:
-            print(layer.name)
+            # print(layer.name)
             # Mera comprobacion para saber si es una capa del tilemap
             if isinstance(layer, pytmx.TiledTileLayer)  and layer.name != "MaskPrincipal":
                 # Si es una capa de tilemap, la recorremos y dibujamos los tiles en la superficie

@@ -7,11 +7,19 @@ from gale.input_handler import InputData
 import settings
 import pygame
 import src.Enemy as Enemy
+from src.globalUtilsFunctions import fade 
 
 class PlayState(BaseState):
     def enter(self, **params: dict):
+        # Variables para el fade in
+
+        self.fade_alpha = 255
+        self.fade_surface = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
+        self.fade_surface.fill((0, 0, 0))
+        self.fade_speed = 3
+   
         
-        if params:  # Si se pasan parámetros, restaurar el estado
+        if params:  # Si se pasan parametros, restaurar el estado
             self.player = params.get("player")
             self.camera = params.get("camera")
             self.solid_objects = params.get("solid_objects", [])
@@ -19,13 +27,11 @@ class PlayState(BaseState):
             self.enemies = params.get("enemies", [])
             self.current_tile_map = params.get("current_tile_map")
             self.map_image = params.get("map_image")
-            # self.horizontal_velocity = params.get("horizontal_velocity", 0)
-            # self.vertical_velocity = params.get("vertical_velocity", 0)
-            # self.player_x = .self.player
-            # self.player_y = objects.y * scale_factor
-                    
+            self.fade_in = False 
+
         else:  # Si no se pasan parámetros, inicializar desde cero
             # Inicializar variables del juego
+            self.transition = True
             self.current_tile_map = TileMap("intro")
             self.map_image = self.current_tile_map.make_map()
             self.map_rect = self.map_image.get_rect()
@@ -70,8 +76,8 @@ class PlayState(BaseState):
                     self.solid_objects.append(solid_rect)
                 elif objects.name in ["fireplace", "torch","castleTorch"]:
                     animated_item = AnimatedItem(
-                        objects.x * scale_factor,
-                        objects.y * scale_factor,
+                        objects.x * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionX"],
+                        objects.y * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionY"],
                         self.object_animations[objects.name],
                         animation_delay=150,
                     )
@@ -99,11 +105,12 @@ class PlayState(BaseState):
                         objects.height * scale_factor,
                     )
                     self.mask_objects.append(mask_rect)
-                 
+            # Indica que estamos haciendo fade in
+            self.fade_in = True
+            
             # Inicializar el jugador
             self.player = Player(self.player_x, self.player_y)
-
-
+            
     def on_input(self, input_id: str, input_data: InputData) -> None:    
         if input_id == "pause" and input_data.pressed:
             self.state_machine.change(
@@ -207,6 +214,12 @@ class PlayState(BaseState):
             self.player.animation_timer = 0    
                 
     def update(self, dt: float) -> None:
+        
+        # Manejar el fade in
+        if self.fade_in:
+            self.fade_alpha = max(0, self.fade_alpha - self.fade_speed)
+            if self.fade_alpha == 0:
+                self.fade_in = False
 
         if self.player.current_health <= 0: 
             self.state_machine.change(
@@ -224,7 +237,8 @@ class PlayState(BaseState):
         # Actualizar objetos animados
         for animated_item in self.animated_items:
             animated_item.update(delta_time)
-            
+
+    # Verifica si el jugador ha llegado a la puerta de salida del nivel.
     def verify_door_next_level(self):
         """
         Verifica si el jugador ha llegado a la puerta de salida del nivel.
@@ -239,12 +253,12 @@ class PlayState(BaseState):
         """
         Renderiza el estado de juego.
         """
-        surface.fill((0, 0, 0))
+        # surface.fill((0, 0, 0))  # Limpiar la pantalla
 
         # Dibujar el mapa
         map_pos = (-self.camera.offset_x, -self.camera.offset_y)
         surface.blit(self.map_image, map_pos)
-
+            
         # Dibujar objetos animados
         for animated_item in self.animated_items:
             animated_item.draw(surface, (self.camera.offset_x, self.camera.offset_y))
@@ -273,6 +287,13 @@ class PlayState(BaseState):
                 solid.height
             )
             pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
+        
+        # Aplicar el fade in
+        if self.fade_in:
+            self.fade_surface.set_alpha(self.fade_alpha)
+            surface.blit(self.fade_surface, (0, 0))
+
+        
         # Debug info
         # debug_info = f"Camera: ({self.camera.offset_x}, {self.camera.offset_y})"
         # font = pygame.font.Font(None, 36)
