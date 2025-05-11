@@ -279,14 +279,14 @@ class PlayState(BaseState):
             
             
         #Dibujar los objetos sólidos
-        for solid in self.solid_objects:
-            rect_with_offset = pygame.Rect(
-                solid.x - self.camera.offset_x,
-                solid.y - self.camera.offset_y,
-                solid.width,
-                solid.height
-            )
-            pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
+        # for solid in self.solid_objects:
+        #     rect_with_offset = pygame.Rect(
+        #         solid.x - self.camera.offset_x,
+        #         solid.y - self.camera.offset_y,
+        #         solid.width,
+        #         solid.height
+        #     )
+        #     pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
         
         # Aplicar el fade in
         if self.fade_in:

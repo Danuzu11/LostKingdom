@@ -21,7 +21,7 @@ class LostKindom(Game):
             }
         )
         self.state_machine.game = self
-        self.state_machine.change("play")       
+        self.state_machine.change("video")       
         # settings.SOUNDS["principal_theme"].play(loops=-1)
         
     def update(self, dt: float) -> None:

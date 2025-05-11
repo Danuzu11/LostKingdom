@@ -444,22 +444,22 @@ class Enemy:
         screen.blit(current_surface, (self.x - offset[0], self.y - offset[1] - self.floor_correct))
         
         # Dibujar el rectangulo de colision 
-        rect_to_draw = pygame.Rect(
-            self.rect.x - offset[0],
-            self.rect.y - offset[1],
-            self.rect.width,
-            self.rect.height,
-        )
-        pygame.draw.rect(screen, (255, 0, 0), rect_to_draw, 2)
+        # rect_to_draw = pygame.Rect(
+        #     self.rect.x - offset[0],
+        #     self.rect.y - offset[1],
+        #     self.rect.width,
+        #     self.rect.height,
+        # )
+        # pygame.draw.rect(screen, (255, 0, 0), rect_to_draw, 2)
         
-        # Dibujar el rectángulo de detección de suelo
-        ground_check = pygame.Rect(
-            self.rect.x + ((self.rect.width + 10) * self.direction)  - offset[0],
-            self.rect.bottom - offset[1],
-            self.rect.width,
-            25
-        )
-        pygame.draw.rect(screen, (0, 255, 0), ground_check, 2)
+        # Dibujar el rectángulo de deteccion de suelo
+        # ground_check = pygame.Rect(
+        #     self.rect.x + ((self.rect.width + 10) * self.direction)  - offset[0],
+        #     self.rect.bottom - offset[1],
+        #     self.rect.width,
+        #     25
+        # )
+        # pygame.draw.rect(screen, (0, 255, 0), ground_check, 2)
                      
     
     def render_health_bar(self, x,y,screen,camera_offset):
