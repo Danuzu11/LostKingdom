@@ -31,13 +31,9 @@ src/
     ├── init.py
     
     ├── LostKindom.py           # Main game file and entry point
-    
     ├── Player.py               # Player character implementation
-    
     │ ├── Movement system
-    
     │ ├── Combat mechanics
-    
     │ ├── Animation states
     │ └── Health system
     │
