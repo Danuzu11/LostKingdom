@@ -62,28 +62,3 @@ class MenuState(BaseState):
             self.fade_out = True
             self.fade_alpha = 0  # Reiniciar el alpha para el fade out
             
-            # fade(self.state_machine.game.screen,
-            #      settings.WINDOW_WIDTH, 
-            #      settings.WINDOW_HEIGHT, 
-            #      fade_in=False, 
-            #      duration=1000
-            # )
-            
-            # # self.state_machine.change("play")
-            
-            # # Iniciar fade out antes de cambiar al estado de juego
-            # self.fade_in = False
-            # self.fade_alpha = 0
-            # self.fade_speed = -5  # Velocidad negativa para fade out
-            # self.fade_surface.set_alpha(0)
-            
-            # # Esperar a que el fade out termine antes de cambiar de estado
-            # while self.fade_alpha < 255:
-            #     self.fade_alpha = min(255, self.fade_alpha - self.fade_speed)
-            #     self.fade_surface.set_alpha(self.fade_alpha)
-            #     self.render(self.state_machine.game.screen)
-            #     pygame.display.flip()
-            #     pygame.time.delay(16)  # Aproximadamente 60 FPS
-                
-            # self.state_machine.change("play")
-                

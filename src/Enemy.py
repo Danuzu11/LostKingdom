@@ -205,7 +205,7 @@ class Enemy:
             sprite_moveset_size = 6
             enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
             self.animations["attack"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
-    
+ 
     # Actualiza el rectangulo de colision
     def update_rect(self):
   

@@ -32,7 +32,10 @@ class PlayState(BaseState):
         else:  # Si no se pasan parámetros, inicializar desde cero
             # Inicializar variables del juego
             self.transition = True
+            
+            
             self.current_tile_map = TileMap("intro")
+            
             self.map_image = self.current_tile_map.make_map()
             self.map_rect = self.map_image.get_rect()
             self.mask_objects = []
@@ -82,6 +85,7 @@ class PlayState(BaseState):
                         animation_delay=150,
                     )
                     self.animated_items.append(animated_item)
+                
                 elif objects.name == "NightBorne":
                     enemy = Enemy(
                         objects.x * scale_factor,
@@ -96,7 +100,7 @@ class PlayState(BaseState):
                         "Golem",
                     )
                     self.enemies.append(enemy)
-                    
+                               
                 elif objects.name == "mask":
                     mask_rect = pygame.Rect(
                         objects.x * scale_factor,

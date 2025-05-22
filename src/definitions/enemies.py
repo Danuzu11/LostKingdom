@@ -73,5 +73,5 @@ Enemies = {
             # Correcccion de la barra de vida del enemigo
             "health_bar_offset_x": 0,   
             "health_bar_offset_y": 0,
-        }
+        },
 }

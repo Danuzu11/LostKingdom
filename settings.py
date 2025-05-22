@@ -78,7 +78,7 @@ ANIMATIONS_DELAYS = {
 
 
 LEVELS = {
-    # "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "introLevel.tmx", pixelalpha=True),
+    # "intro1": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "introLevel.tmx", pixelalpha=True),
     "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "levelTest.tmx", pixelalpha=True),
 }
 
@@ -112,6 +112,7 @@ TEXTURES = {
     
     #"menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "menu.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
     "menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "slayer.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
+    "death2": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "death2.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
 }
 
 
@@ -155,7 +156,7 @@ COMPLEX_FRAMES = {
         "Run":  frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Run"], 64 , 64),        
         "Attack": frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Attack"], 64 , 64),
     },
-  
+    
 }
 
 # Generar frames del sprite
