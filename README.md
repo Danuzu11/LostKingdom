@@ -130,7 +130,7 @@ pip install pygame pytmx pymovie https://github.com/R3mmurd/Gale/archive/main.zi
 
 3. Run the game:
 ```bash
-python src/LostKindom.py
+python src/main.py
 ```
 
 ## 🎨 Game Development

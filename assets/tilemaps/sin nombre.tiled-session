@@ -1,5 +1,5 @@
 {
-    "activeFile": "introLevel.tmx",
+    "activeFile": "",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "Todos los archivos (*)",
@@ -87,9 +87,9 @@
                 2
             ],
             "scale": 1,
-            "selectedLayer": 14,
+            "selectedLayer": 10,
             "viewCenter": {
-                "x": 1764.5,
+                "x": 1833.5,
                 "y": 148
             }
         },
@@ -123,15 +123,12 @@
     },
     "last.imagePath": "C:/Users/AMD/Desktop/Videojuegos/LostKindom/LostKingdom/assets/textures/imagenes",
     "openFiles": [
-        "introLevel.tmx",
-        "level1.tmx",
-        "level2.tmx",
         "levelTest.tmx"
     ],
     "project": "sin nombre.tiled-project",
     "recentFiles": [
-        "imagenes.tsx",
         "levelTest.tmx",
+        "imagenes.tsx",
         "introLevel.tmx",
         "level2.tmx",
         "level1.tmx",
