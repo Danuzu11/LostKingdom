@@ -29,10 +29,15 @@ Memories of the Lost Kingdom is an immersive 2D action-adventure game where play
 ## 📁 Project Structure
 src/
     ├── init.py
+    
     ├── LostKindom.py           # Main game file and entry point
+    
     ├── Player.py               # Player character implementation
+    
     │ ├── Movement system
+    
     │ ├── Combat mechanics
+    
     │ ├── Animation states
     │ └── Health system
     │
