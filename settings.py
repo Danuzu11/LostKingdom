@@ -71,7 +71,7 @@ GRAVITY = 0.5
 
 ANIMATIONS_DELAYS = {
     "run": 100, 
-    "attack": 250, 
+    "attack": 350, 
     "jump": 300, 
     "idle": 90
 }
@@ -80,6 +80,7 @@ ANIMATIONS_DELAYS = {
 LEVELS = {
     # "intro1": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "introLevel.tmx", pixelalpha=True),
     "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "levelTest.tmx", pixelalpha=True),
+    "roomboss": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "roomboss.tmx", pixelalpha=True),
 }
 
 SOUNDS = {
@@ -128,6 +129,10 @@ COMPLEX_TEXTURES = {
         "NightBorne": pygame.image.load(BASE_DIR / "assets" / "textures" / "NightBorne.png"),
     },
     
+    "Minotaur":{ 
+        "Minotaur": pygame.image.load(BASE_DIR / "assets" / "textures" / "minotaur" / "minotaur.png"),
+    },
+    
     "Golem":{
         "Idle": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" /"Golem_IdleB.png"),
         "Run": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" /"Golem_Run.png"),
@@ -151,6 +156,10 @@ COMPLEX_FRAMES = {
         "NightBorne": frames.generate_frames(COMPLEX_TEXTURES["NightBorne"]["NightBorne"], enemy1_width, enemy1_height),
     },
     
+    "Minotaur":{
+        "Minotaur": frames.generate_frames(COMPLEX_TEXTURES["Minotaur"]["Minotaur"], 288 , 160),
+    },
+        
     "Golem":{
         "Idle":  frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Idle"], 64 , 64),  
         "Run":  frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Run"], 64 , 64),        
@@ -172,9 +181,6 @@ FRAMES = {
     "torch": frames.generate_frames(TEXTURES["torch"], 64, 64),  
     "castleTorch": frames.generate_frames(TEXTURES["castleTorch"], 12, 42),
     
-    # "enemyIdle": frames.generate_frames(TEXTURES["idle"], king_width , king_height - 6),
-    # "enemyMove": frames.generate_frames(TEXTURES["kingRun"], king_width - 2, king_height - 6),
-    # "enemyAttack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height - 6),
 }
 
 
@@ -189,6 +195,11 @@ ANIMATIONS_ENEMY_DELAYS = {
         "idle": 80,
         "run": 80,
         "attack": 50,
+    },
+    "Minotaur": {
+        "idle": 100,
+        "run": 100,
+        "attack": 150,
     },
 }
 

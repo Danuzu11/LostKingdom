@@ -1,0 +1,104 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "Todos los archivos (*)",
+    "fileStates": {
+        "TX Tileset Ground.tsx": {
+            "scaleInDock": 1
+        },
+        "background_layer_1.tsx": {
+            "scaleInDock": 1
+        },
+        "background_layer_2.tsx": {
+            "scaleInDock": 1
+        },
+        "background_layer_3.tsx": {
+            "scaleInDock": 1
+        },
+        "door.tsx": {
+            "scaleInDock": 1
+        },
+        "imagenes.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "imagenesCastle.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "levelTest.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 0.75,
+            "selectedLayer": 15,
+            "viewCenter": {
+                "x": 1936.6666666666665,
+                "y": 219.99999999999994
+            }
+        },
+        "levelTest.tmx#imagenes": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "objetos_villa.tsx": {
+            "scaleInDock": 1
+        },
+        "roomboos.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.25,
+            "scaleInEditor": 1
+        },
+        "roomboos2.tsx": {
+            "scaleInDock": 0.125,
+            "scaleInEditor": 0.5
+        },
+        "roomboss.tmx": {
+            "expandedObjectLayers": [
+                6
+            ],
+            "scale": 0.5,
+            "selectedLayer": 4,
+            "viewCenter": {
+                "x": 1061,
+                "y": 454
+            }
+        },
+        "roomboss3.tsx": {
+            "scaleInDock": 0.75,
+            "scaleInEditor": 1
+        },
+        "roomboss4.tsx": {
+            "scaleInDock": 0.125
+        },
+        "roomboss5.tsx": {
+            "scaleInEditor": 1
+        },
+        "torch_big_background.tsx": {
+            "scaleInDock": 1
+        }
+    },
+    "last.imagePath": "C:/Users/AMD/Desktop/Videojuegos/LostKindom/LostKingdom/assets/textures/imagenes",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+    ],
+    "project": "bossRoom.tiled-project",
+    "recentFiles": [
+        "roomboos2.tsx",
+        "roomboss3.tsx",
+        "roomboos.tsx",
+        "roomboss5.tsx",
+        "levelTest.tmx",
+        "imagenesCastle.tsx",
+        "imagenes.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.type": 0
+}

@@ -33,22 +33,43 @@ class TileMap:
                         surface.blit(tile, (x * self.tmx_data.tilewidth,
                                             y * self.tmx_data.tileheight))
                  
+    # def make_map(self):
+    #     # Crear una superficie temporal con las dimensiones originales del tilemap
+    #     temp_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+    #     self.render(temp_surface)
+        
+    #     # Calcular el factor de escala para ajustar el tilemap al alto virtual de la pantalla
+    #     scale_factor = settings.VIRTUAL_HEIGHT / self.height
+
+    #     # Escalar el tilemap
+    #     scaled_width = int(self.width * scale_factor)
+    #     scaled_height = int(self.height * scale_factor)
+    #     scaled_surface = pygame.transform.smoothscale(temp_surface, (scaled_width, scaled_height))
+
+    #     return scaled_surface
+    
     def make_map(self):
         # Crear una superficie temporal con las dimensiones originales del tilemap
         temp_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         self.render(temp_surface)
         
-        # Calcular el factor de escala para ajustar el tilemap al alto virtual de la pantalla
-        scale_factor = settings.VIRTUAL_HEIGHT / self.height
+        # Altura máxima de tiles que quieres mostrar sin escalar (por ejemplo, 70 tiles)
+        max_tile_height = 10
+        max_pixel_height = max_tile_height * self.tmx_data.tileheight
 
-        # Escalar el tilemap
-        scaled_width = int(self.width * scale_factor)
-        scaled_height = int(self.height * scale_factor)
-        scaled_surface = pygame.transform.smoothscale(temp_surface, (scaled_width, scaled_height))
+        # Si el mapa es mas pequeño que el maximo, escálalo para que ocupe la pantalla
+        if self.height <= max_pixel_height:
+            scale_factor = settings.VIRTUAL_HEIGHT / self.height
+            scaled_width = int(self.width * scale_factor)
+            scaled_height = int(self.height * scale_factor)
+            scaled_surface = pygame.transform.smoothscale(temp_surface, (scaled_width, scaled_height))
+            return scaled_surface
+        else:
+            # Si el mapa es más grande, NO lo escales, deja que la camara lo recorra
+            return temp_surface  
+         
 
-        return scaled_surface
-    
-
+    # MASCARAS
     def render_mask(self, surface, camera_offset=None):
         """
         Renderiza el layer "MaskPrincipal" con soporte para offset de cámara y escalado.
@@ -88,8 +109,6 @@ class TileMap:
         
         # Calcular el factor de escala para ajustar el tilemap al alto virtual de la pantalla
         scale_factor = settings.VIRTUAL_HEIGHT / self.height
-
-        # Escalar el tilemap
         scaled_width = int(self.width * scale_factor)
         scaled_height = int(self.height * scale_factor)
         scaled_surface = pygame.transform.smoothscale(temp_surface, (scaled_width, scaled_height))

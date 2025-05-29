@@ -8,6 +8,7 @@ import settings
 import pygame
 import src.Enemy as Enemy
 from src.globalUtilsFunctions import fade 
+from src.QuadTree import QuadTree
 
 class PlayState(BaseState):
     def enter(self, **params: dict):
@@ -28,20 +29,30 @@ class PlayState(BaseState):
             self.current_tile_map = params.get("current_tile_map")
             self.map_image = params.get("map_image")
             self.fade_in = False 
-
-        else:  # Si no se pasan parámetros, inicializar desde cero
+            
+        else:  # Si no se pasan parametros, inicializar desde cero
             # Inicializar variables del juego
             self.transition = True
             
             
             self.current_tile_map = TileMap("intro")
-            
+            # self.current_tile_map = TileMap("roomboss")
             self.map_image = self.current_tile_map.make_map()
             self.map_rect = self.map_image.get_rect()
             self.mask_objects = []
-            # Escalar el mapa
+            
+            
+            # Escalar el mapa si el mapa creado es mucho mas peque;o que la pantalla
             scale_factor = settings.VIRTUAL_HEIGHT / self.current_tile_map.height
-
+            
+            # El tama;o maximo de altura sera 16 en tile (relacion por la ventana que tenemos)
+            max_tile_height = 16
+            max_pixel_height = max_tile_height * self.current_tile_map.tmx_data.tileheight
+            
+            # Si el mapa es mas grande no hara ningun reescalado
+            if self.current_tile_map.height > max_pixel_height:
+                scale_factor = 1
+            # scale_factor = 1
             # Inicializar la cámara
             self.camera = Camera()
             self.camera.set_world_size(self.map_image.get_width(), self.map_image.get_height())
@@ -100,6 +111,13 @@ class PlayState(BaseState):
                         "Golem",
                     )
                     self.enemies.append(enemy)
+                elif objects.name == "Minotaur":
+                    enemy = Enemy(
+                        objects.x * scale_factor,
+                        objects.y * scale_factor,
+                        "Minotaur",
+                    )
+                    self.enemies.append(enemy)
                                
                 elif objects.name == "mask":
                     mask_rect = pygame.Rect(
@@ -109,6 +127,7 @@ class PlayState(BaseState):
                         objects.height * scale_factor,
                     )
                     self.mask_objects.append(mask_rect)
+        
             # Indica que estamos haciendo fade in
             self.fade_in = True
             
@@ -172,7 +191,6 @@ class PlayState(BaseState):
                 new_state = "jump"
                 self.player.jumping = True
                 self.player.vertical_velocity = settings.PLAYER_SPEED_JUMP
-                self.player.ground_collide = False
                 self.player.current_combo = 1
                 self.player.current_frame = 0
                 self.player.attacking = False
@@ -229,14 +247,56 @@ class PlayState(BaseState):
             self.state_machine.change(
                 "game_over"
             )   
-            
+            return
+        
         delta_time = dt * 1000
 
-        # Actualizar enemigos
-        for enemy in self.enemies:
-            enemy.update(delta_time, self.player, self.solid_objects)
+        # --- Optimización: Quadtree para Colisiones ---
+        # 1. Definir los límites del Quadtree (un poco más grande que la vista de la cámara)
+        # Asumiendo que tienes VIRTUAL_WIDTH y VIRTUAL_HEIGHT en settings
+        quadtree_padding = 100 # Píxeles de padding
+        quadtree_bounds = pygame.Rect(
+            self.camera.offset_x - quadtree_padding,
+            self.camera.offset_y - quadtree_padding,
+            settings.VIRTUAL_WIDTH + quadtree_padding * 2,
+            settings.VIRTUAL_HEIGHT + quadtree_padding * 2
+        )
         
-        self.player.update(delta_time, self.solid_objects)
+        # 2. Crear/Reconstruir el Quadtree
+        # Ajusta max_objects y max_depth según sea necesario.
+        # Valores típicos: max_objects=4-8, max_depth=4-6
+        self.collision_quadtree = QuadTree(quadtree_bounds, max_objects=5, max_depth=5)
+        
+        # 3. Insertar objetos sólidos en el Quadtree
+        for solid_rect in self.solid_objects:
+            # Solo insertar si el objeto está dentro o cerca del área del Quadtree (opcional, pero bueno)
+            if quadtree_bounds.colliderect(solid_rect): # Podría ser self.collision_quadtree.boundary.colliderect
+                self.collision_quadtree.insert(solid_rect, "solid", solid_rect) # obj_ref es el mismo rect
+
+        # 4. Obtener objetos sólidos cercanos al jugador para las colisiones
+        # Área de búsqueda un poco más grande que el jugador para capturar colisiones inminentes
+        player_query_rect = self.player.king_rect.inflate(self.player.king_rect.width, self.player.king_rect.height) 
+        
+        nearby_solid_data = self.collision_quadtree.query(player_query_rect)
+        solid_objects_for_player = [data['rect'] for data in nearby_solid_data if data['type'] == "solid"]
+        
+        # Actualizar jugador, pasando solo los sólidos cercanos
+        self.player.update(delta_time, solid_objects_for_player) # Modificado: solo sólidos cercanos
+         
+        # Actualizar enemigos
+        # Actualizar enemigos (también podrían usar el Quadtree)
+        for enemy in self.enemies:
+            # Obtener sólidos cercanos para cada enemigo
+            enemy_query_rect = enemy.rect.inflate(500, 500) # Asumiendo que enemy tiene .rect
+            nearby_solid_data_enemy = self.collision_quadtree.query(enemy_query_rect)
+            solid_objects_for_enemy = [data['rect'] for data in nearby_solid_data_enemy if data['type'] == "solid"]
+            enemy.update(delta_time, self.player, solid_objects_for_enemy) # Pasa sólidos cercanos
+            
+            
+        # for enemy in self.enemies:
+        #     enemy.update(delta_time, self.player, self.solid_objects)
+        
+        # self.player.update(delta_time, self.solid_objects)
         self.camera.update(self.player.camera_rect, None)   
         # Actualizar objetos animados
         for animated_item in self.animated_items:
@@ -258,21 +318,56 @@ class PlayState(BaseState):
         Renderiza el estado de juego.
         """
         # surface.fill((0, 0, 0))  # Limpiar la pantalla
-
+        camera_view_rect = pygame.Rect(
+            self.camera.offset_x, self.camera.offset_y,
+            settings.VIRTUAL_WIDTH, settings.VIRTUAL_HEIGHT 
+        )
         # Dibujar el mapa
         map_pos = (-self.camera.offset_x, -self.camera.offset_y)
         surface.blit(self.map_image, map_pos)
             
-        # Dibujar objetos animados
-        for animated_item in self.animated_items:
-            animated_item.draw(surface, (self.camera.offset_x, self.camera.offset_y))
+        # # Dibujar objetos animados
+        # for animated_item in self.animated_items:
+        #     animated_item.draw(surface, (self.camera.offset_x, self.camera.offset_y))
             
 
         
-        # Dibujar enemigos
+        # # Dibujar enemigos
+        # for enemy in self.enemies:
+        #     enemy.draw(surface, (self.camera.offset_x , self.camera.offset_y))
+          
+        # Dibujar objetos animados (solo los visibles)
+        for animated_item in self.animated_items:
+            # Obtener el frame actual para determinar sus dimensiones
+            if animated_item.frames: # Asegurarse de que la lista de frames no está vacía
+                current_sprite_frame = animated_item.frames[animated_item.current_frame]
+                item_width = current_sprite_frame.get_width()
+                item_height = current_sprite_frame.get_height()
+                
+                # Crear el rectángulo del item en coordenadas del MUNDO
+                item_world_rect = pygame.Rect(animated_item.x, animated_item.y, item_width, item_height)
+                
+                # Comprobar si este rectángulo es visible en la cámara
+                if camera_view_rect.colliderect(item_world_rect):
+                    # El método draw ya maneja el offset de la cámara
+                    animated_item.draw(surface, (self.camera.offset_x, self.camera.offset_y))
+            # else:
+                # Podrías tener un manejo para items sin frames si fuera posible,
+                # pero según tu init, siempre deberían tener frames.
+
+
+        # Dibujar enemigos (solo los visibles)
         for enemy in self.enemies:
-            enemy.draw(surface, (self.camera.offset_x , self.camera.offset_y))
-            
+            # Asumiendo que Enemy tiene un método get_world_rect() o atributos x,y,width,height
+            # enemy_world_rect = enemy.get_world_rect() # Idealmente
+            # O si tiene .rect que está en coordenadas del mundo:
+            if hasattr(enemy, 'rect') and camera_view_rect.colliderect(enemy.rect):
+                enemy.draw(surface, (self.camera.offset_x, self.camera.offset_y),self.player,self.solid_objects)
+            elif hasattr(enemy, 'x') and hasattr(enemy, 'current_surface'): # Si tiene x,y y una superficie actual
+                enemy_world_rect = enemy.current_surface.get_rect(topleft=(enemy.x, enemy.y))
+                if camera_view_rect.colliderect(enemy_world_rect):
+                    enemy.draw(surface, (self.camera.offset_x, self.camera.offset_y),self.player,self.solid_objects)
+                      
         # Dibujar al jugador
         player_screen_x = self.player.x - self.camera.offset_x
         player_screen_y = self.player.y - self.camera.offset_y
@@ -283,14 +378,14 @@ class PlayState(BaseState):
             
             
         #Dibujar los objetos sólidos
-        # for solid in self.solid_objects:
-        #     rect_with_offset = pygame.Rect(
-        #         solid.x - self.camera.offset_x,
-        #         solid.y - self.camera.offset_y,
-        #         solid.width,
-        #         solid.height
-        #     )
-        #     pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
+        for solid in self.solid_objects:
+            rect_with_offset = pygame.Rect(
+                solid.x - self.camera.offset_x,
+                solid.y - self.camera.offset_y,
+                solid.width,
+                solid.height
+            )
+            pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
         
         # Aplicar el fade in
         if self.fade_in:

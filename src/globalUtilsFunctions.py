@@ -13,13 +13,15 @@ def fade(screen, width, height, fade_in=False, duration=500):
         duration: La duración del efecto en milisegundos.
     """
     fade_surface = pygame.Surface((width, height))
-    fade_surface.fill((0, 0, 0))  # Puedes cambiar el color a blanco o el que desees
+    # Ponemos por defecto el color negro
+    fade_surface.fill((0, 0, 0))  
     if fade_in:
         alpha_start, alpha_end = 255, 0
     else:
         alpha_start, alpha_end = 0, 255
 
-    steps = 50  # Numero de pasos para el efecto (ajusta para más suavidad o velocidad)
+    # Numero de pasos por defecto
+    steps = 50  
     delay = duration / steps
 
     for i in range(steps + 1):
@@ -35,7 +37,7 @@ def update_vertical_acceleration(vertical_velocity, gravity , y , ground_y , ver
         vertical_velocity += gravity
         y += vertical_velocity
                 
-        # Verificar si hemos llegado al suelo
+        # Verificamos si hemos llegado al piso
         if y >= ground_y:
             y = ground_y
             vertical_movement = False
@@ -43,6 +45,7 @@ def update_vertical_acceleration(vertical_velocity, gravity , y , ground_y , ver
 
     return vertical_velocity, y, vertical_movement
 
+# Funcion que me permite extraer los sprites de una hoja de animacion de un unico moveset
 def extract_animation_unique_spritesheet(sprite_sheet_name,moveset_name,scale_factor=1):
 
     textures = settings.COMPLEX_TEXTURES[sprite_sheet_name][moveset_name]
@@ -63,6 +66,8 @@ def extract_animation_unique_spritesheet(sprite_sheet_name,moveset_name,scale_fa
                   
     return animations
 
+# Funcion que me permite extraer los sprites de una hoja de animacion de muchos movesets
+# En este caso debemos escoger el rango de sprites que queremos extraer segun querramos
 def extract_animation_complex_spritesheet(sprite_sheet_name,scale_factor=1):
 
     textures = settings.COMPLEX_TEXTURES[sprite_sheet_name][sprite_sheet_name]
@@ -79,6 +84,10 @@ def extract_animation_complex_spritesheet(sprite_sheet_name,scale_factor=1):
                 int(surface.get_height() * scale_factor),
             ),
         )
+        # Como los sprite del monotauro esta volteado , debemos voltearlos todos
+        if sprite_sheet_name == "Minotaur":
+            scaled_surface = pygame.transform.flip(scaled_surface, True, False)
+
         animations.append(scaled_surface)  
                   
     return animations

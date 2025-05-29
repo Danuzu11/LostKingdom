@@ -30,7 +30,7 @@ Enemies = {
             "max_health": 100,
             "attack_range": 60,
             "detection_range": 100,
-            "attack_damage": 10,
+            "attack_damage": 1,
             
             # Corecccion de la barra de vida del enemigo
             "health_bar_offset_x": 40,   
@@ -65,7 +65,7 @@ Enemies = {
             "max_health": 200,
             "attack_range": 60,
             "detection_range": 200,
-            "attack_damage": 30,
+            "attack_damage": 1,
             
             # Correcion en la posicion del piso base del enemigo para que no cambie segun su rectangulo de colision
             "floor_correct": 70,
@@ -73,5 +73,42 @@ Enemies = {
             # Correcccion de la barra de vida del enemigo
             "health_bar_offset_x": 0,   
             "health_bar_offset_y": 0,
-        },
+    },
+    "Minotaur": {
+        "speed": settings.ENEMY_SPEED,
+        "delay": settings.ANIMATIONS_ENEMY_DELAYS,
+            
+        # Correccion de posicion en x , ya que manejamos escalas distintas entonces nos ayuda a centrar a nuestro enemigo
+        "position_x_correct": 250,
+            
+        # Tama;o base ancho y alto del rectangulo de colision del enemigo
+        "base_rect_width": 50,
+        "base_rect_height": 85,
+            
+        # Tama;os para los offset del rectangulo de colision (acomodar su posicion inicial en el sprite del enemigo y se vea mas acorde)
+        "enemy_rect_offset_x": 220 , 
+        "enemy_rect_offset_y": -95,
+            
+        # Agranda el rectangulo de colision para los ataques fisicos
+        "attack_rect_width": 100,
+            
+        # Correccion extra para la posicion en y , para acomodar el sprite del enemigo en Y
+        "extra_custom_offset_y": -185,
+            
+        # Factor de escalado entre mayor el numero mas grande se crea el sprite
+        "scale_factor": 1.8,
+            
+        # Datos base del enemigo
+        "max_health": 200,
+        "attack_range": 60,
+        "detection_range": 1,
+        "attack_damage": 30,
+            
+        # Correcion en la posicion del piso base del enemigo para que no cambie segun su rectangulo de colision
+        "floor_correct": 70,
+            
+        # Correcccion de la barra de vida del enemigo
+        "health_bar_offset_x": -45,   
+        "health_bar_offset_y": 0,
+    },
 }

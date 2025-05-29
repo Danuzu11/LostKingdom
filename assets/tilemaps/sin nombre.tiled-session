@@ -1,5 +1,5 @@
 {
-    "activeFile": "",
+    "activeFile": "levelTest.tmx",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "Todos los archivos (*)",
@@ -87,9 +87,9 @@
                 2
             ],
             "scale": 1,
-            "selectedLayer": 10,
+            "selectedLayer": 16,
             "viewCenter": {
-                "x": 1833.5,
+                "x": 483.5,
                 "y": 148
             }
         },

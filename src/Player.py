@@ -8,6 +8,10 @@ class Player:
     
     def __init__(self, x, y):
 
+        # Nuevos flags para mayor control:
+        self.can_move = True # Puede ser False durante ciertas partes del ataque
+        self.can_initiate_new_action = True # Para controlar cuándo se pueden iniciar nuevos saltos/ataques
+        
         # Sistema de vida
         self.max_health = 100
         self.current_health = self.max_health
@@ -79,9 +83,7 @@ class Player:
         self.jumping = False
         self.vertical_velocity = 0
         self.ground_y = y
-        self.ground_collide = False
         
-
 
         # Varibles para controlar el ancho de rectangulo de colision del personaje, cuando no hace nada y cuando ataca, (porque no quiero que sean del mismo tama;o que el sprite del jugador)
         # Y cuando ataca el rectangulo de colision crecera
@@ -94,13 +96,6 @@ class Player:
         self.on_ground = False
         self.horizontal_velocity = 0
         
-        # Offset para centrar el rectángulo con el sprite, ya que como el rectangulo se alargara a izquierda o derecha debemos cambia la posicion en x y y de donde inicia
-        # son parapetos :p pero era lo mas rapido 
-       
-        # Ajustes mañosos 
-        # self.rect_offset_x = 40
-        # self.rect_offset_y = -10
-
         scale_factor = 1.3 
         # Calcula el nuevo offset en Y para centrar el rectángulo con el sprite escalado
         # Suponiendo que el sprite original y el rectángulo estaban alineados antes del escalado:
@@ -130,6 +125,7 @@ class Player:
         # Entonces esta variable sera estatica para guardar el punto de referencia de la camara para moverse en consecuencia al jugador
         self.camera_rect = self.king_rect
     
+
     def check_collision(self, solid_objects:pygame.Rect):
         # Empezamos a recorrer el arreglo de solidos
         for solid in solid_objects:
@@ -144,7 +140,7 @@ class Player:
                 # Encontramos la distancia mínima para determinar el tipo de colisión
                 min_dist = min(dist_top, dist_bottom, dist_left, dist_right)
 
-                # Colisión desde arriba (cayendo)
+                # Colision desde arriba (cayendo)
                 if min_dist == dist_top and self.vertical_velocity > 0:
                     print("colision suelo")
                     self.y = solid.top - self.king_rect.height - self.rect_offset_y
@@ -153,25 +149,25 @@ class Player:
                     self.ground_y = self.y
                     self.on_ground = True
 
-                # Colisión desde abajo (saltando)
+                # Colision desde abajo (saltando)
                 elif min_dist == dist_bottom and self.vertical_velocity < 0:
                     print("colision techo")
                     self.y = solid.bottom * 1.05
                     self.vertical_velocity = 0
 
-                # Colisión desde la derecha
+                # Colision desde la derecha
                 elif min_dist == dist_left and self.direction == 1:
                     print("colision por la derecha del personaje")
                     self.horizontal_velocity = 0
                     self.x = solid.left - self.base_rect_width - self.rect_offset_x * 2 - 2
 
-                # Colisión desde la izquierda
+                # Colision desde la izquierda
                 elif min_dist == dist_right and self.direction == -1:
                     print("colision por la izquierda del personaje")
                     self.horizontal_velocity = 0
                     self.x = solid.right - self.base_rect_width - self.rect_offset_x * 1.2 + 1
 
-                # Manejo de colisiones diagonales cuando está en el aire
+                # Manejo de colisiones diagonales cuando esta en el aire
                 if not self.on_ground:
                     # Si estamos cayendo y hay una colisión lateral
                     if self.vertical_velocity > 0:
@@ -181,7 +177,6 @@ class Player:
                         elif self.direction == -1 and self.king_rect.left < solid.right:
                             self.horizontal_velocity = 0
                             self.x = solid.right - self.base_rect_width - self.rect_offset_x * 1.2 + 1
-
 
     def receive_hit(self, direction, damage):
         # Logica para recibir el golpe, es decir si el jugador recibe un golpe se activa la variable hurt y se le asigna una direccion de knockback
@@ -253,18 +248,20 @@ class Player:
             self.vertical_velocity, settings.GRAVITY, self.y, self.ground_y, self.jumping
         )
           
-        if self.current_state == "jump" and self.vertical_velocity == 0:
+        if self.current_state == "jump" and self.vertical_velocity == 0 and self.on_ground:
             self.current_state = "idle" 
             self.jumping = False
         
-        if self.current_state == "idle" and self.horizontal_velocity != 0:   
+        if self.current_state == "idle" and self.horizontal_velocity != 0 and self.on_ground:   
             self.current_state = "run"   
             self.jumping = False
-                         
+            
+        elif self.current_state == "run" and self.horizontal_velocity == 0 and self.on_ground: 
+            self.current_state = "idle"                   
         # Current delay es para saber cuanto tiempo tiene que pasar para que se cambie el frame de la animacion
         current_delay = settings.ANIMATIONS_DELAYS[self.current_state]
 
-        # Actualizar animación
+        # Actualizar animacion
         if self.animation_timer >= current_delay:
             self.update_animation()
             self.animation_timer = 0
@@ -294,6 +291,126 @@ class Player:
 
         # Actualizamos la posicion del rectangulo segun donde este jugador
         self.update_camera_rect()
+  
+    # def update(self, delta_time, solid_objects):
+    #     self.animation_timer += delta_time
+
+    #     # --- Lógica de Herido (Prioridad Alta) ---
+    #     if self.hurt:
+    #         self.apply_knockback(delta_time, solid_objects)
+    #         self.can_move = False # No se puede mover activamente si está herido
+    #         self.attacking = False # Cancelar cualquier ataque
+    #         self.in_attack_windup = False
+    #         self.in_attack_recovery = False
+    #         if pygame.time.get_ticks() - self.hurt_timer > self.hurt_duration:
+    #             self.hurt = False
+    #             self.current_state = "idle" # Forzar idle después de herido
+    #             self.current_frame = 0
+    #             self.can_move = True
+    #             self.can_initiate_new_action = True
+    #         return
+
+    #     if self.invulnerable: # ... (lógica de invulnerabilidad) ...
+    #         pass
+
+    #     # --- Lógica de Ataque (Prioridad Media-Alta) ---
+    #     # Manejar timers de windup y recovery
+    #     current_time = pygame.time.get_ticks()
+    #     if self.in_attack_windup:
+    #         self.can_move = False # No moverse durante windup
+    #         if current_time - self.attack_windup_timer >= self.attack_windup:
+    #             self.in_attack_windup = False
+    #             # Aquí es donde el ataque "activo" realmente comienza (animación de ataque)
+    #             self.current_state = "attack" # Asegurar estado de ataque
+    #             self.current_frame = 0 # Iniciar desde el primer frame del combo actual
+    #             self.animation_timer = 0
+    #             self.attacking = True # Marcar que la secuencia de ataque está activa
+    #             self.can_initiate_new_action = False # No iniciar nuevas acciones hasta que termine el recovery
+    #             # self.horizontal_velocity = 0 # Detener movimiento al iniciar el ataque activo
+        
+    #     if self.attacking: # Si la secuencia de ataque está activa (después del windup)
+    #         self.can_move = False # O permitir movimiento muy lento durante algunos ataques
+    #         self.horizontal_velocity *= 0.2 # Reducir drásticamente velocidad si se permite algo de movimiento
+            
+    #         self.combo_timer += delta_time # Para el timeout del combo
+    #         # La animación de ataque avanza en update_animation_frame()
+    #         # El cambio de frames del combo y fin del ataque se maneja en update_animation_frame()
+
+    #     if self.in_attack_recovery:
+    #         self.can_move = True # Puede empezar a moverse en recovery, pero no atacar
+    #         self.horizontal_velocity *= 0.8 # Recuperar velocidad gradualmente
+    #         if current_time - self.attack_recovery_timer >= self.attack_recovery:
+    #             self.in_attack_recovery = False
+    #             self.can_initiate_new_action = True # Puede iniciar nuevas acciones
+    #             if not self.jumping : self.current_state = "idle" # Volver a idle si no hay otra acción
+    #             # self.current_combo = 1 # Resetear combo si no se continuó
+        
+    #     # --- Lógica de Movimiento y Salto (si `can_move` y `can_initiate_new_action` lo permiten) ---
+    #     # Aplicar gravedad y movimiento vertical (salto/caída)
+    #     # Esto debe ocurrir incluso si no se `can_move` horizontalmente (ej. durante un ataque en el aire)
+    #     if not self.on_ground or self.jumping:
+    #         self.vertical_velocity += settings.GRAVITY
+    #         self.y += self.vertical_velocity * (delta_time / 1000.0) # Aplicar delta_time
+
+    #     # Movimiento Horizontal (controlado por input, modificado por `can_move`)
+    #     if self.can_move:
+    #         self.x += self.horizontal_velocity * (delta_time / 1000.0)
+    #     else: # Si no puede moverse (ej. durante ataque), asegurar que la velocidad horizontal sea 0 o muy baja
+    #         if not self.attacking : self.horizontal_velocity = 0 # Detener completamente si no está en la parte activa del ataque
+
+    #     # Colisiones con el mundo
+    #     self.check_collision(solid_objects) # Ajustará X, Y, on_ground, vertical_velocity
+
+    #     # --- Actualización de Estados (basado en acciones y colisiones) ---
+    #     if not self.attacking and not self.in_attack_windup and not self.in_attack_recovery and not self.hurt:
+    #         if self.jumping: # Si está en el aire (saltando o cayendo)
+    #             if self.current_state != "jump":
+    #                 self.current_state = "jump"
+    #                 self.current_frame = 0 # Usar primer frame de salto
+    #         elif self.on_ground: # Si está en el suelo
+    #             if self.horizontal_velocity != 0 and self.can_move:
+    #                 if self.current_state != "run":
+    #                     self.current_state = "run"
+    #                     self.current_frame = 0
+    #             elif self.horizontal_velocity == 0: # O !self.can_move
+    #                 if self.current_state != "idle":
+    #                     self.current_state = "idle"
+    #                     self.current_frame = 0
+        
+    #     # Actualizar el frame de la animación actual
+    #     current_delay = settings.ANIMATIONS_DELAYS[self.current_state]
+
+    #     # Actualizar animacion
+    #     if self.animation_timer >= current_delay:
+    #         self.update_animation()
+    #         self.animation_timer = 0
+        
+    #     # Actualizar tamaño del rectangulo de colision, dependiendo de si esta atacando o no
+    #     rect_width = self.attack_rect_width if self.attacking else self.base_rect_width
+        
+    #     # Actualizar posicion del rectangulo de colisión
+    #     if self.direction == 1:
+    #         rect_x = self.x + self.rect_offset_x * 2 
+    #     else:
+    #         # correccion para que el rectangulo crezca a la izquierda
+    #         rect_x = self.x + (self.rect_offset_x * 2 - rect_width) + 11
+    #     # Actualizar posicion del rectangulo de colisión
+    #     if self.direction == 1:
+    #         rect_x = self.x + self.rect_offset_x * 2 
+    #     else:
+    #         # correccion para que el rectangulo crezca a la izquierda
+    #         rect_x = self.x + (self.rect_offset_x * 2 - rect_width) + 11
+        
+    #     # Crea el nuevo rectangulo de colision para el player (hay que actualizarlo cada vez que se mueve el player)  
+    #     self.king_rect = pygame.Rect(
+    #         rect_x, 
+    #         self.y + self.rect_offset_y, 
+    #         rect_width, 
+    #         self.base_rect_height
+    #     )
+    
+    #     # Actualizar el rectángulo del jugador
+    #     self.update_camera_rect()    
     
     def apply_knockback(self, delta_time, solid_objects):
         knockback_distance = self.knockback_direction * self.knockback_speed * (delta_time / 1000)
@@ -303,7 +420,7 @@ class Player:
                 return  # No aplicar knockback si colisiona
             
         self.x += knockback_distance
-        
+    
     # Metodo para dibujar o renderizar al player en el frame que este ejecutando   
     def render(self, screen,camera_offset=None):
         # Si el jugador esta muerto no renderiza nada
@@ -334,7 +451,7 @@ class Player:
         # text = font.render(debug_info, True, (255, 255, 255))
         # screen.blit(text, (10, 10))
 
-        # Usar la posición ajustada por la cámara si está disponible, este es un metodo particular porque aqui la posicion va conforme a la camara
+        # Usar la posicion ajustada por la camara si está disponible, este es un metodo particular porque aqui la posicion va conforme a la camara
         # Ya que el personaje se movera en conjunto con la camara y los objetos no deben moverse con el
         x, y = camera_offset if camera_offset else (self.x, self.y)
         y_render = y + self.rect_offset_y * 3 # Aplica el offset vertical
@@ -343,20 +460,20 @@ class Player:
         # Renderizar la barra de salud
         self.render_health_bar(x,y_render,screen)
         
-        # Dibujar el rectángulo de colisión (para depuración)
-       # Dibujar el rectángulo de colisión (para depuración)
-        # Ajusta la posición del rectángulo según el offset de la cámara
-        # rect_draw_x = self.king_rect.x
-        # rect_draw_y = self.king_rect.y
-        # if camera_offset:
-        #     rect_draw_x = self.king_rect.x - self.x + x
-        #     rect_draw_y = self.king_rect.y - self.y + y
-        # pygame.draw.rect(
-        #     screen,
-        #     (255, 0, 0),  # Color rojo
-        #     pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
-        #     2,  # Grosor de la línea
-        # )
+   
+       # Dibujar el rectángulo de colision
+        # Ajusta la posición del rectángulo según el offset de la camara
+        rect_draw_x = self.king_rect.x
+        rect_draw_y = self.king_rect.y
+        if camera_offset:
+            rect_draw_x = self.king_rect.x - self.x + x
+            rect_draw_y = self.king_rect.y - self.y + y
+        pygame.draw.rect(
+            screen,
+            (255, 0, 0),  # Color rojo
+            pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
+            2,  # Grosor de la línea
+        )
     
     # METODO AUXILIARES
     # Actuliza el rectangulo de colision de la camara, es decir el rectangulo que se usa para mover la camara
