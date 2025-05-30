@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "levelTest.tmx",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "Todos los archivos (*)",
@@ -38,9 +38,9 @@
                 2
             ],
             "scale": 0.75,
-            "selectedLayer": 15,
+            "selectedLayer": 16,
             "viewCenter": {
-                "x": 1936.6666666666665,
+                "x": 671.3333333333333,
                 "y": 219.99999999999994
             }
         },
@@ -53,11 +53,11 @@
         },
         "roomboos.tsx": {
             "dynamicWrapping": false,
-            "scaleInDock": 0.25,
+            "scaleInDock": 0.5,
             "scaleInEditor": 1
         },
         "roomboos2.tsx": {
-            "scaleInDock": 0.125,
+            "scaleInDock": 0.5,
             "scaleInEditor": 0.5
         },
         "roomboss.tmx": {
@@ -72,13 +72,15 @@
             }
         },
         "roomboss3.tsx": {
-            "scaleInDock": 0.75,
+            "scaleInDock": 1,
             "scaleInEditor": 1
         },
         "roomboss4.tsx": {
-            "scaleInDock": 0.125
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
         },
         "roomboss5.tsx": {
+            "scaleInDock": 0.25,
             "scaleInEditor": 1
         },
         "torch_big_background.tsx": {
@@ -88,14 +90,21 @@
     "last.imagePath": "C:/Users/AMD/Desktop/Videojuegos/LostKindom/LostKingdom/assets/textures/imagenes",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
+        "roomboss.tmx",
+        "roomboss3.tsx",
+        "roomboos.tsx",
+        "roomboss4.tsx",
+        "levelTest.tmx"
     ],
     "project": "bossRoom.tiled-project",
     "recentFiles": [
-        "roomboos2.tsx",
-        "roomboss3.tsx",
-        "roomboos.tsx",
-        "roomboss5.tsx",
         "levelTest.tmx",
+        "roomboss4.tsx",
+        "roomboos.tsx",
+        "roomboss3.tsx",
+        "roomboss.tmx",
+        "roomboos2.tsx",
+        "roomboss5.tsx",
         "imagenesCastle.tsx",
         "imagenes.tsx"
     ],
