@@ -14,8 +14,9 @@ class LostKindom(Game):
         self.state_machine = StateMachine(
             {
                 "video": states.VideoState,
+                "intro": states.IntroState,  
+                "menu": states.MenuState,# Añadir el nuevo estado
                 "play": states.PlayState,
-                "menu": states.MenuState,
                 "pause": states.PauseState,
                 "game_over": states.GameOverState,
             }

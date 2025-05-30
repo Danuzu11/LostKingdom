@@ -32,18 +32,19 @@ def fade(screen, width, height, fade_in=False, duration=500):
         pygame.time.delay(int(delay))
         
         
-def update_vertical_acceleration(vertical_velocity, gravity , y , ground_y , vertical_movement):
+def update_vertical_acceleration(vertical_velocity, gravity , y , ground_y , vertical_movement, current_state):
     if vertical_movement:
         vertical_velocity += gravity
         y += vertical_velocity
-                
+        current_state= "jump"        
         # Verificamos si hemos llegado al piso
         if y >= ground_y:
             y = ground_y
             vertical_movement = False
             vertical_velocity = 0
+            current_state= "idle"   
 
-    return vertical_velocity, y, vertical_movement
+    return vertical_velocity, y, vertical_movement , current_state
 
 # Funcion que me permite extraer los sprites de una hoja de animacion de un unico moveset
 def extract_animation_unique_spritesheet(sprite_sheet_name,moveset_name,scale_factor=1):

@@ -13,12 +13,14 @@ from src.QuadTree import QuadTree
 class PlayState(BaseState):
     def enter(self, **params: dict):
         # Variables para el fade in
-
         self.fade_alpha = 255
         self.fade_surface = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
         self.fade_surface.fill((0, 0, 0))
         self.fade_speed = 3
-   
+
+         # Lista de niveles disponibles
+        self.available_levels = list(settings.LEVELS.keys())
+        self.current_level_index = 0  
         
         if params:  # Si se pasan parametros, restaurar el estado
             self.player = params.get("player")
@@ -29,112 +31,259 @@ class PlayState(BaseState):
             self.current_tile_map = params.get("current_tile_map")
             self.map_image = params.get("map_image")
             self.fade_in = False 
-            
+            self.current_level_index = params.get("current_level_index", 0)
+
         else:  # Si no se pasan parametros, inicializar desde cero
-            # Inicializar variables del juego
             self.transition = True
+            self.current_level_index = 0
+            self.load_level(self.available_levels[self.current_level_index])
             
             
-            self.current_tile_map = TileMap("intro")
-            # self.current_tile_map = TileMap("roomboss")
-            self.map_image = self.current_tile_map.make_map()
-            self.map_rect = self.map_image.get_rect()
-            self.mask_objects = []
+            # Inicializar variables del juego
+            # self.transition = True
+            # self.current_tile_map = TileMap("intro")
+            # # self.current_tile_map = TileMap("roomboss")
+            # self.map_image = self.current_tile_map.make_map()
+            # self.map_rect = self.map_image.get_rect()
+            # self.mask_objects = []
             
             
-            # Escalar el mapa si el mapa creado es mucho mas peque;o que la pantalla
-            scale_factor = settings.VIRTUAL_HEIGHT / self.current_tile_map.height
+            # # Escalar el mapa si el mapa creado es mucho mas peque;o que la pantalla
+            # scale_factor = settings.VIRTUAL_HEIGHT / self.current_tile_map.height
             
-            # El tama;o maximo de altura sera 16 en tile (relacion por la ventana que tenemos)
-            max_tile_height = 16
-            max_pixel_height = max_tile_height * self.current_tile_map.tmx_data.tileheight
+            # # El tama;o maximo de altura sera 16 en tile (relacion por la ventana que tenemos)
+            # max_tile_height = 16
+            # max_pixel_height = max_tile_height * self.current_tile_map.tmx_data.tileheight
+            
+            # # Si el mapa es mas grande no hara ningun reescalado
+            # if self.current_tile_map.height > max_pixel_height:
+            #     scale_factor = 1
+            # # scale_factor = 1
+            # # Inicializar la cámara
+            # self.camera = Camera()
+            # self.camera.set_world_size(self.map_image.get_width(), self.map_image.get_height())
+
+            # # Inicializar el jugador
+            # self.player_x, self.player_y = 0, 0
+            # self.solid_objects = []
+            # self.animated_items = []
+            # self.object_animations = {}
+            # self.enemies = []
+
+            # # Cargar animaciones de objetos (spritesheets cargados desde settings.py)
+            # for spritesheet_name, spritesheet_data in settings.ANIMATED_DECORATIONS.items():
+            #     spritesheet = spritesheet_data["texture"]
+            #     frames = spritesheet_data["frames"]
+            #     animation_frames = []
+            #     for frame in frames:
+            #         surface = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
+            #         surface.blit(spritesheet, (0, 0), frame)
+            #         animation_frames.append(surface)
+            #     self.object_animations[spritesheet_name] = animation_frames
+
+            # # Cargar objetos del mapa
+            # for objects in self.current_tile_map.tmx_data.objects:
+            #     if objects.name == "Player":
+            #         self.player_x = objects.x * scale_factor
+            #         self.player_y = objects.y * scale_factor
+            #     elif objects.name == "obstacle":
+            #         solid_rect = pygame.Rect(
+            #             objects.x * scale_factor,
+            #             objects.y * scale_factor,
+            #             objects.width * scale_factor,
+            #             objects.height * scale_factor,
+            #         )
+            #         self.solid_objects.append(solid_rect)
+            #     elif objects.name in ["fireplace", "torch","castleTorch"]:
+            #         animated_item = AnimatedItem(
+            #             objects.x * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionX"],
+            #             objects.y * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionY"],
+            #             self.object_animations[objects.name],
+            #             animation_delay=150,
+            #         )
+            #         self.animated_items.append(animated_item)
+                
+            #     elif objects.name == "NightBorne":
+            #         enemy = Enemy(
+            #             objects.x * scale_factor,
+            #             objects.y * scale_factor,
+            #             "NightBorne",
+            #         )
+            #         self.enemies.append(enemy)
+            #     elif objects.name == "Golem":
+            #         enemy = Enemy(
+            #             objects.x * scale_factor,
+            #             objects.y * scale_factor,
+            #             "Golem",
+            #         )
+            #         self.enemies.append(enemy)
+            #     elif objects.name == "Minotaur":
+            #         enemy = Enemy(
+            #             objects.x * scale_factor,
+            #             objects.y * scale_factor,
+            #             "Minotaur",
+            #         )
+            #         self.enemies.append(enemy)
+                               
+            #     elif objects.name == "mask":
+            #         mask_rect = pygame.Rect(
+            #             objects.x * scale_factor,
+            #             objects.y * scale_factor,
+            #             objects.width * scale_factor,
+            #             objects.height * scale_factor,
+            #         )
+            #         self.mask_objects.append(mask_rect)
+        
+            # # Indica que estamos haciendo fade in
+            # self.fade_in = True
+            
+            # # Inicializar el jugador
+            # self.player = Player(self.player_x, self.player_y)
+
+
+    def load_level(self, level_name):
+        """Carga un nuevo nivel"""
+  
+        # Limpiar objetos del nivel anterior
+        self.solid_objects = []
+        self.animated_items = []
+        self.enemies = []
+        self.mask_objects = []
+        
+        # Cargar el nuevo nivel
+        self.current_tile_map = TileMap(level_name)
+        self.map_image = self.current_tile_map.make_map()
+        self.map_rect = self.map_image.get_rect()
+            # Inicializar variables del juego
+        self.transition = True
+            
+        # Escalar el mapa si el mapa creado es mucho mas peque;o que la pantalla
+        scale_factor = settings.VIRTUAL_HEIGHT / self.current_tile_map.height
+            
+        # El tama;o maximo de altura sera 16 en tile (relacion por la ventana que tenemos)
+        max_tile_height = 16
+        max_pixel_height = max_tile_height * self.current_tile_map.tmx_data.tileheight
             
             # Si el mapa es mas grande no hara ningun reescalado
-            if self.current_tile_map.height > max_pixel_height:
-                scale_factor = 1
+        if self.current_tile_map.height > max_pixel_height:
+            scale_factor = 1
             # scale_factor = 1
             # Inicializar la cámara
-            self.camera = Camera()
-            self.camera.set_world_size(self.map_image.get_width(), self.map_image.get_height())
+        self.camera = Camera()
+        self.camera.set_world_size(self.map_image.get_width(), self.map_image.get_height())
 
             # Inicializar el jugador
-            self.player_x, self.player_y = 0, 0
-            self.solid_objects = []
-            self.animated_items = []
-            self.object_animations = {}
-            self.enemies = []
+        self.player_x, self.player_y = 0, 0
+        self.solid_objects = []
+        self.animated_items = []
+        self.object_animations = {}
+        self.enemies = []
 
-            # Cargar animaciones de objetos (spritesheets cargados desde settings.py)
-            for spritesheet_name, spritesheet_data in settings.ANIMATED_DECORATIONS.items():
-                spritesheet = spritesheet_data["texture"]
-                frames = spritesheet_data["frames"]
-                animation_frames = []
-                for frame in frames:
-                    surface = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
-                    surface.blit(spritesheet, (0, 0), frame)
-                    animation_frames.append(surface)
-                self.object_animations[spritesheet_name] = animation_frames
+        # Cargar animaciones de objetos (spritesheets cargados desde settings.py)
+        for spritesheet_name, spritesheet_data in settings.ANIMATED_DECORATIONS.items():
+            spritesheet = spritesheet_data["texture"]
+            frames = spritesheet_data["frames"]
+            animation_frames = []
+            for frame in frames:
+                surface = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
+                surface.blit(spritesheet, (0, 0), frame)
+                animation_frames.append(surface)
+            self.object_animations[spritesheet_name] = animation_frames
 
-            # Cargar objetos del mapa
-            for objects in self.current_tile_map.tmx_data.objects:
-                if objects.name == "Player":
-                    self.player_x = objects.x * scale_factor
-                    self.player_y = objects.y * scale_factor
-                elif objects.name == "obstacle":
-                    solid_rect = pygame.Rect(
-                        objects.x * scale_factor,
-                        objects.y * scale_factor,
-                        objects.width * scale_factor,
-                        objects.height * scale_factor,
-                    )
-                    self.solid_objects.append(solid_rect)
-                elif objects.name in ["fireplace", "torch","castleTorch"]:
-                    animated_item = AnimatedItem(
-                        objects.x * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionX"],
-                        objects.y * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionY"],
-                        self.object_animations[objects.name],
-                        animation_delay=150,
-                    )
-                    self.animated_items.append(animated_item)
-                
-                elif objects.name == "NightBorne":
-                    enemy = Enemy(
-                        objects.x * scale_factor,
-                        objects.y * scale_factor,
-                        "NightBorne",
-                    )
-                    self.enemies.append(enemy)
-                elif objects.name == "Golem":
-                    enemy = Enemy(
-                        objects.x * scale_factor,
-                        objects.y * scale_factor,
-                        "Golem",
-                    )
-                    self.enemies.append(enemy)
-                elif objects.name == "Minotaur":
-                    enemy = Enemy(
-                        objects.x * scale_factor,
-                        objects.y * scale_factor,
-                        "Minotaur",
-                    )
-                    self.enemies.append(enemy)
-                               
-                elif objects.name == "mask":
-                    mask_rect = pygame.Rect(
-                        objects.x * scale_factor,
-                        objects.y * scale_factor,
-                        objects.width * scale_factor,
-                        objects.height * scale_factor,
-                    )
-                    self.mask_objects.append(mask_rect)
+        # Cargar objetos del mapa
+        for objects in self.current_tile_map.tmx_data.objects:
+            if objects.name == "Player":
+                self.player_x = objects.x * scale_factor
+                self.player_y = objects.y * scale_factor
+            elif objects.name == "obstacle":
+                solid_rect = pygame.Rect(
+                    objects.x * scale_factor,
+                    objects.y * scale_factor,
+                    objects.width * scale_factor,
+                    objects.height * scale_factor,
+                )
+                self.solid_objects.append(solid_rect)
+            elif objects.name in ["fireplace", "torch","castleTorch"]:
+                animated_item = AnimatedItem(
+                    objects.x * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionX"],
+                    objects.y * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionY"],
+                    self.object_animations[objects.name],
+                    animation_delay=150,
+                )
+                self.animated_items.append(animated_item)
+            
+            elif objects.name == "NightBorne":
+                enemy = Enemy(
+                    objects.x * scale_factor,
+                    objects.y * scale_factor,
+                    "NightBorne",
+                )
+                self.enemies.append(enemy)
+            elif objects.name == "Golem":
+                enemy = Enemy(
+                    objects.x * scale_factor,
+                    objects.y * scale_factor,
+                    "Golem",
+                )
+                self.enemies.append(enemy)
+            elif objects.name == "Minotaur":
+                enemy = Enemy(
+                    objects.x * scale_factor,
+                    objects.y * scale_factor,
+                    "Minotaur",
+                )
+                self.enemies.append(enemy)
+                            
+            elif objects.name == "mask":
+                mask_rect = pygame.Rect(
+                    objects.x * scale_factor,
+                    objects.y * scale_factor,
+                    objects.width * scale_factor,
+                    objects.height * scale_factor,
+                )
+                self.mask_objects.append(mask_rect)
+    
+        # Indica que estamos haciendo fade in
+        self.fade_in = True
         
-            # Indica que estamos haciendo fade in
-            self.fade_in = True
+        # Inicializar el jugador
+        self.player = Player(self.player_x, self.player_y)        
+
+    def on_input(self, input_id: str, input_data: InputData) -> None:  
+        new_state = "idle"     
+
+        if input_id == "next_level" and input_data.pressed:
+            # Avanzar al siguiente nivel
+            self.current_level_index = (self.current_level_index + 1) % len(self.available_levels)
+            next_level = self.available_levels[self.current_level_index]
             
-            # Inicializar el jugador
-            self.player = Player(self.player_x, self.player_y)
+            # Guardar el estado actual para pasarlo al nuevo nivel
+            current_state = {
+                "player": self.player,
+                "camera": self.camera,
+                "solid_objects": self.solid_objects,
+                "animated_items": self.animated_items,
+                "enemies": self.enemies,
+                "current_tile_map": self.current_tile_map,
+                "map_image": self.map_image,
+                "current_level_index": self.current_level_index
+            }
             
-    def on_input(self, input_id: str, input_data: InputData) -> None:    
+            # self.state_machine.change(
+            #     "play",
+            #     previous_state=self,
+            #     player=self.player,
+            #     camera=self.camera,
+            #     solid_objects=self.solid_objects,
+            #     animated_items=self.animated_items,
+            #     enemies=self.enemies,
+            #     current_tile_map=self.current_tile_map,
+            #     map_image=self.map_image
+            # )
+            
+            # Cargar el nuevo nivel
+            self.load_level(next_level)
+            
         if input_id == "pause" and input_data.pressed:
             self.state_machine.change(
                 "pause",
@@ -147,10 +296,10 @@ class PlayState(BaseState):
                 current_tile_map=self.current_tile_map,
                 map_image=self.map_image
             )
-            
+
         if input_id == "enter" and input_data.pressed:
             self.state_machine.change("menu")  # Cambiar al estado de menú
-        new_state = "idle"      
+    
         if input_id == "move_left":
             if input_data.pressed:
                 self.player.horizontal_velocity = -settings.PLAYER_SPEED
@@ -167,7 +316,7 @@ class PlayState(BaseState):
                 if self.player.on_ground and not self.player.jumping:
                     self.player.current_state = "idle"
 
-        elif input_id == "move_right":
+        if input_id == "move_right":
             if input_data.pressed:
                 self.player.horizontal_velocity = settings.PLAYER_SPEED
                 self.player.direction = 1
@@ -183,9 +332,9 @@ class PlayState(BaseState):
                 if self.player.on_ground and not self.player.jumping:
                     self.player.current_state = "idle"
        
-        elif input_id == "jump" and self.player.vertical_velocity == 0 and not self.player.jumping:
+        if input_id == "jump" and not self.player.jumping:
+            
             if self.player.on_ground and not self.player.jumping:
-
                 self.player.jumping = True
                 self.player.current_state = "jump"
                 new_state = "jump"
@@ -195,7 +344,7 @@ class PlayState(BaseState):
                 self.player.current_frame = 0
                 self.player.attacking = False
                         
-        elif input_id == "x" and not self.player.jumping :
+        elif input_id == "x" and not self.player.jumping and self.player.horizontal_velocity == 0 :
             random_attack = 1
             # Validamos si no estamos atacando ya , si el player no se encuentra atacando entonces comienza el ataque en combo
             if not self.player.attacking:
@@ -227,7 +376,8 @@ class PlayState(BaseState):
                  
                     self.player.current_frame = 0
                     self.player.combo_timer = 0
-                              
+        
+                     
         if new_state != self.player.current_state:
             self.player.current_state = new_state
             # Solo resetear frame si no estamos atacando
@@ -251,9 +401,8 @@ class PlayState(BaseState):
         
         delta_time = dt * 1000
 
-        # --- Optimización: Quadtree para Colisiones ---
-        # 1. Definir los límites del Quadtree (un poco más grande que la vista de la cámara)
-        # Asumiendo que tienes VIRTUAL_WIDTH y VIRTUAL_HEIGHT en settings
+        # Quadtree para Colisiones ---
+        # 1. Definir los limites del Quadtree (un poco más grande que la vista de la camara)
         quadtree_padding = 100 # Píxeles de padding
         quadtree_bounds = pygame.Rect(
             self.camera.offset_x - quadtree_padding,
@@ -264,19 +413,17 @@ class PlayState(BaseState):
         
         # 2. Crear/Reconstruir el Quadtree
         # Ajusta max_objects y max_depth según sea necesario.
-        # Valores típicos: max_objects=4-8, max_depth=4-6
-        self.collision_quadtree = QuadTree(quadtree_bounds, max_objects=5, max_depth=5)
+        self.collision_quadtree = QuadTree(quadtree_bounds, max_objects=7, max_depth=6)
         
-        # 3. Insertar objetos sólidos en el Quadtree
+        # 3. Insertar objetos solidos en el Quadtree
         for solid_rect in self.solid_objects:
-            # Solo insertar si el objeto está dentro o cerca del área del Quadtree (opcional, pero bueno)
-            if quadtree_bounds.colliderect(solid_rect): # Podría ser self.collision_quadtree.boundary.colliderect
-                self.collision_quadtree.insert(solid_rect, "solid", solid_rect) # obj_ref es el mismo rect
+            # Solo insertar si el objeto está dentro o cerca del area del Quadtree
+            if quadtree_bounds.colliderect(solid_rect): 
+                self.collision_quadtree.insert(solid_rect, "solid", solid_rect)
 
-        # 4. Obtener objetos sólidos cercanos al jugador para las colisiones
-        # Área de búsqueda un poco más grande que el jugador para capturar colisiones inminentes
+        # 4. Obtener objetos solidos cercanos al jugador para las colisiones
+        # Area de busqueda
         player_query_rect = self.player.king_rect.inflate(self.player.king_rect.width, self.player.king_rect.height) 
-        
         nearby_solid_data = self.collision_quadtree.query(player_query_rect)
         solid_objects_for_player = [data['rect'] for data in nearby_solid_data if data['type'] == "solid"]
         
@@ -284,10 +431,9 @@ class PlayState(BaseState):
         self.player.update(delta_time, solid_objects_for_player) # Modificado: solo sólidos cercanos
          
         # Actualizar enemigos
-        # Actualizar enemigos (también podrían usar el Quadtree)
         for enemy in self.enemies:
-            # Obtener sólidos cercanos para cada enemigo
-            enemy_query_rect = enemy.rect.inflate(500, 500) # Asumiendo que enemy tiene .rect
+            # Obtener solidos cercanos para cada enemigo
+            enemy_query_rect = enemy.rect.inflate(500, 500) 
             nearby_solid_data_enemy = self.collision_quadtree.query(enemy_query_rect)
             solid_objects_for_enemy = [data['rect'] for data in nearby_solid_data_enemy if data['type'] == "solid"]
             enemy.update(delta_time, self.player, solid_objects_for_enemy) # Pasa sólidos cercanos

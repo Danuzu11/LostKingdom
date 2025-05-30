@@ -17,9 +17,9 @@ class MenuState(BaseState):
         self.fade_in = True  
         self.fade_out = False 
         settings.SOUNDS["principal_theme"].stop()
-        settings.SOUNDS["principal_theme"].play(loops=-1)
-        self.font = pygame.font.Font(None, 48)  
-
+        settings.SOUNDS["principal_theme"].play(loops=-1) 
+        self.font2 = settings.FONTS["verybig"] 
+        self.font = settings.FONTS["medium"]
         
     def update(self, dt: float) -> None:
         """
@@ -35,7 +35,7 @@ class MenuState(BaseState):
         if self.fade_out:
             self.fade_alpha = min(255, self.fade_alpha + self.fade_speed)
             if self.fade_alpha == 255:
-                self.state_machine.change("play")    
+                self.state_machine.change("intro")    
                 
     def render(self, surface):
         """
@@ -44,8 +44,17 @@ class MenuState(BaseState):
 
         #surface.fill((0, 0, 0))  # Fondo negro
         surface.blit(settings.TEXTURES["menu"], (0, 0))
-        text = self.font.render("Press ENTER to Start", True, (255, 255, 255))
-        text_rect = text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2))
+        
+        text = self.font.render("Presiona ENTER para empezar...", True, (255, 255, 255))
+        text_rect = text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2 + 230))
+        surface.blit(text, text_rect)
+        
+        text = self.font2.render("Lost", True, (255, 255, 255))
+        text_rect = text.get_rect(center=(surface.get_width() // 2 + 200, surface.get_height() // 5))
+        surface.blit(text, text_rect)
+        
+        text = self.font2.render("Kingdom", True, (255, 255, 255))
+        text_rect = text.get_rect(center=(surface.get_width() // 2 + 120 + 200, surface.get_height() // 3))
         surface.blit(text, text_rect)
         
         # Aplicar el fade in o fade out

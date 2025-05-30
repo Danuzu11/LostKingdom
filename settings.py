@@ -28,6 +28,8 @@ input_handler.InputHandler.set_keyboard_action(input_handler.KEY_a, "move_left")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_x, "x")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_p, "pause")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_z, "next_level")
+
 pygame.mixer.init()
 pygame.init()
 
@@ -94,6 +96,8 @@ SOUNDS = {
     "principal_theme1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "EclipsedDesolation.wav"),
     "menu_theme1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "CursedCitadel(Intro).wav"),
     "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "smoothMedieval.mp3"),
+
+     "maquinaescribir": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "maquinaescribir.mp3"),
 }
 
 # Generar textura del spritesheet
@@ -114,6 +118,8 @@ TEXTURES = {
     #"menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "menu.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
     "menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "slayer.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
     "death2": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "death2.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
+    "intro2": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "intro2.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
+  
 }
 
 
@@ -235,4 +241,6 @@ pygame.font.init()
 FONTS = {
     "small": pygame.font.Font(BASE_DIR / "assets" / "fonts" / "font.ttf", 8),
     "medium": pygame.font.Font(BASE_DIR / "assets" / "fonts" / "font.ttf", 16),
+    "big": pygame.font.Font(BASE_DIR / "assets" / "fonts" / "font.ttf", 32),
+    "verybig": pygame.font.Font(BASE_DIR / "assets" / "fonts" / "font.ttf", 64),
 } 

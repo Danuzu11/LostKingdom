@@ -8,6 +8,12 @@
     ],
     "file.lastUsedOpenFilter": "Todos los archivos (*)",
     "fileStates": {
+        "Castillo.tsx": {
+            "scaleInDock": 1
+        },
+        "DecoracionCastillo.tsx": {
+            "scaleInDock": 1
+        },
         "TX Tileset Ground.tsx": {
             "scaleInDock": 1
         },
@@ -20,7 +26,12 @@
         "background_layer_3.tsx": {
             "scaleInDock": 1
         },
+        "decoracionesCastilloBoss.tsx": {
+            "dynamicWrapping": true,
+            "scaleInEditor": 1
+        },
         "door.tsx": {
+            "dynamicWrapping": false,
             "scaleInDock": 1
         },
         "imagenes.tsx": {
@@ -31,17 +42,25 @@
         "imagenesCastle.tsx": {
             "dynamicWrapping": false,
             "scaleInDock": 1,
-            "scaleInEditor": 1
+            "scaleInEditor": 2
+        },
+        "levelCastle.tmx": {
+            "scale": 3,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 510.16666666666663,
+                "y": 420.3333333333333
+            }
         },
         "levelTest.tmx": {
             "expandedObjectLayers": [
                 2
             ],
-            "scale": 0.75,
+            "scale": 0.5,
             "selectedLayer": 16,
             "viewCenter": {
-                "x": 671.3333333333333,
-                "y": 219.99999999999994
+                "x": 2039,
+                "y": 218
             }
         },
         "levelTest.tmx#imagenes": {
@@ -64,11 +83,11 @@
             "expandedObjectLayers": [
                 6
             ],
-            "scale": 0.5,
-            "selectedLayer": 4,
+            "scale": 2,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 1061,
-                "y": 454
+                "x": 218.25,
+                "y": 102.5
             }
         },
         "roomboss3.tsx": {
@@ -84,10 +103,11 @@
             "scaleInEditor": 1
         },
         "torch_big_background.tsx": {
+            "dynamicWrapping": false,
             "scaleInDock": 1
         }
     },
-    "last.imagePath": "C:/Users/AMD/Desktop/Videojuegos/LostKindom/LostKingdom/assets/textures/imagenes",
+    "last.imagePath": "C:/Users/AMD/Desktop/Videojuegos/LostKindom/LostKingdom/assets/textures/Decorations",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
         "roomboss.tmx",
@@ -99,15 +119,21 @@
     "project": "bossRoom.tiled-project",
     "recentFiles": [
         "levelTest.tmx",
+        "decoracionesCastilloBoss.tsx",
+        "imagenesCastle.tsx",
+        "levelCastle.tmx",
         "roomboss4.tsx",
         "roomboos.tsx",
         "roomboss3.tsx",
         "roomboss.tmx",
         "roomboos2.tsx",
         "roomboss5.tsx",
-        "imagenesCastle.tsx",
         "imagenes.tsx"
     ],
     "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 32,
+        "width": 41
+    },
     "tileset.type": 0
 }

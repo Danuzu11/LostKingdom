@@ -93,7 +93,7 @@ class Player:
 
         
         # Variables de control , para movimiento horizontal
-        self.on_ground = False
+        self.on_ground = True
         self.horizontal_velocity = 0
         
         scale_factor = 1.3 
@@ -125,7 +125,7 @@ class Player:
         # Entonces esta variable sera estatica para guardar el punto de referencia de la camara para moverse en consecuencia al jugador
         self.camera_rect = self.king_rect
     
-
+    # Verificador de colisiones con el mundo
     def check_collision(self, solid_objects:pygame.Rect):
         # Empezamos a recorrer el arreglo de solidos
         for solid in solid_objects:
@@ -137,7 +137,7 @@ class Player:
                 dist_left = abs(self.king_rect.right - solid.left)
                 dist_right = abs(self.king_rect.left - solid.right)
 
-                # Encontramos la distancia mínima para determinar el tipo de colisión
+                # Encontramos la distancia minima para determinar el tipo de colisión
                 min_dist = min(dist_top, dist_bottom, dist_left, dist_right)
 
                 # Colision desde arriba (cayendo)
@@ -166,18 +166,8 @@ class Player:
                     print("colision por la izquierda del personaje")
                     self.horizontal_velocity = 0
                     self.x = solid.right - self.base_rect_width - self.rect_offset_x * 1.2 + 1
-
-                # Manejo de colisiones diagonales cuando esta en el aire
-                if not self.on_ground:
-                    # Si estamos cayendo y hay una colisión lateral
-                    if self.vertical_velocity > 0:
-                        if self.direction == 1 and self.king_rect.right > solid.left:
-                            self.horizontal_velocity = 0
-                            self.x = solid.left - self.base_rect_width - self.rect_offset_x * 2 - 2
-                        elif self.direction == -1 and self.king_rect.left < solid.right:
-                            self.horizontal_velocity = 0
-                            self.x = solid.right - self.base_rect_width - self.rect_offset_x * 1.2 + 1
-
+       
+    # Logica para cuando recibe un golpe             
     def receive_hit(self, direction, damage):
         # Logica para recibir el golpe, es decir si el jugador recibe un golpe se activa la variable hurt y se le asigna una direccion de knockback
         # Esto es para que el jugador no pueda recibir mas de un golpe al mismo tiempo, es decir si ya esta herido no puede volver a ser herido
@@ -201,24 +191,30 @@ class Player:
     def update(self,delta_time,solid_objects):   
         # Aumentamos el tiempo de la animacion y el tiempo del combo 
         self.animation_timer += delta_time 
-    
-
+                 
         # Si esta herido, aplicar knockback y controlar invulnerabilidad
-        if self.hurt:
-            # self.x += self.knockback_direction * self.knockback_speed * (delta_time / 1000)
+        if self.hurt:          
             self.apply_knockback(delta_time, solid_objects)
             if pygame.time.get_ticks() - self.hurt_timer > self.hurt_duration:
                 self.hurt = False
                 self.current_state = "idle"
                 self.current_frame = 0
                 return
-                
+          
+        # Verificamos si el jugador e invulnerable, si es asi no puede recibir mas golpes      
         if self.invulnerable:
             if pygame.time.get_ticks() - self.invulnerable_timer > self.invulnerable_duration:
                 self.invulnerable = False
 
-        # self.horizontal_velocity = settings.PLAYER_SPEED * delta_time / 1000
+        # Siempre podra moverse en x , para que se desplace saltando y atacando tambien
+        self.x += self.horizontal_velocity * delta_time / 1000
         
+        # Aplicamos la logica de aceleracion vertical y caida libre para el salto
+        self.vertical_velocity, self.y, self.jumping , self.current_state = update_vertical_acceleration(
+            self.vertical_velocity, settings.GRAVITY, self.y, self.ground_y, self.jumping , self.current_state
+        )
+        
+        # --- FÍSICA Y COLISIONES ---
         if self.current_state == "idle" or self.current_state == "run":
             # Verificar si hay suelo debajo antes de aplicar gravedad
             is_on_ground = self.check_ground(solid_objects)
@@ -229,38 +225,37 @@ class Player:
                 
             # # Si no hay colisión con el suelo, aplicar "gravedad"
             if not self.on_ground:
-                self.vertical_velocity += settings.GRAVITY  # Aceleración constante hacia abajo
+                self.vertical_velocity += settings.GRAVITY
                 self.y += self.vertical_velocity
                 
-                   
+            
         # Verificamos colisiones con objetos solidos
         # En este caso el player no tiene colisiones con enemigos por ahora (evaluar)
         self.check_collision(solid_objects)
         
-        # if self.current_state != "jump" or self.current_state != "run":
-        #     self.horizontal_velocity = 0
-
-        # Siempre podra moverse en x , para que se desplace saltando y atacando tambien
-        self.x += self.horizontal_velocity * delta_time / 1000
-          
-        # Aplicamos la logica de aceleracion vertical y caida libre para el salto
-        self.vertical_velocity, self.y, self.jumping = update_vertical_acceleration(
-            self.vertical_velocity, settings.GRAVITY, self.y, self.ground_y, self.jumping
-        )
-          
+        # --- CONTROL DE ESTADOS ---  
+        # 1. Al aterrizar (venía de salto o caída)
         if self.current_state == "jump" and self.vertical_velocity == 0 and self.on_ground:
             self.current_state = "idle" 
             self.jumping = False
-        
+        # 2. Corriendo (venia de idle )
         if self.current_state == "idle" and self.horizontal_velocity != 0 and self.on_ground:   
             self.current_state = "run"   
             self.jumping = False
-            
+        # 3. Quieto (venia de correr)   
         elif self.current_state == "run" and self.horizontal_velocity == 0 and self.on_ground: 
-            self.current_state = "idle"                   
+            self.current_state = "idle"       
+        
+        # if self.vertical_velocity != 0:    
+        #     self.current_state = "jump"   
+                      
         # Current delay es para saber cuanto tiempo tiene que pasar para que se cambie el frame de la animacion
-        current_delay = settings.ANIMATIONS_DELAYS[self.current_state]
-
+        if self.current_state == "fall":
+            current_delay = settings.ANIMATIONS_DELAYS["jump"]
+        else:
+            current_delay = settings.ANIMATIONS_DELAYS[self.current_state]         
+  
+  
         # Actualizar animacion
         if self.animation_timer >= current_delay:
             self.update_animation()
@@ -270,7 +265,16 @@ class Player:
             self.combo_timer += delta_time
         else:
             self.combo_timer = 0
-            
+        
+
+        # Actualizar el rectángulo de colisión del jugador
+        self.update_player_rect()  
+
+        # Actualizamos la posicion del rectangulo segun donde este jugador
+        self.update_camera_rect()
+
+    # Acutualiza rectangulo de colision
+    def update_player_rect(self):
         # Actualizar tamaño del rectangulo de colision, dependiendo de si esta atacando o no
         rect_width = self.attack_rect_width if self.attacking else self.base_rect_width
         
@@ -289,129 +293,7 @@ class Player:
             self.base_rect_height
         )
 
-        # Actualizamos la posicion del rectangulo segun donde este jugador
-        self.update_camera_rect()
-  
-    # def update(self, delta_time, solid_objects):
-    #     self.animation_timer += delta_time
-
-    #     # --- Lógica de Herido (Prioridad Alta) ---
-    #     if self.hurt:
-    #         self.apply_knockback(delta_time, solid_objects)
-    #         self.can_move = False # No se puede mover activamente si está herido
-    #         self.attacking = False # Cancelar cualquier ataque
-    #         self.in_attack_windup = False
-    #         self.in_attack_recovery = False
-    #         if pygame.time.get_ticks() - self.hurt_timer > self.hurt_duration:
-    #             self.hurt = False
-    #             self.current_state = "idle" # Forzar idle después de herido
-    #             self.current_frame = 0
-    #             self.can_move = True
-    #             self.can_initiate_new_action = True
-    #         return
-
-    #     if self.invulnerable: # ... (lógica de invulnerabilidad) ...
-    #         pass
-
-    #     # --- Lógica de Ataque (Prioridad Media-Alta) ---
-    #     # Manejar timers de windup y recovery
-    #     current_time = pygame.time.get_ticks()
-    #     if self.in_attack_windup:
-    #         self.can_move = False # No moverse durante windup
-    #         if current_time - self.attack_windup_timer >= self.attack_windup:
-    #             self.in_attack_windup = False
-    #             # Aquí es donde el ataque "activo" realmente comienza (animación de ataque)
-    #             self.current_state = "attack" # Asegurar estado de ataque
-    #             self.current_frame = 0 # Iniciar desde el primer frame del combo actual
-    #             self.animation_timer = 0
-    #             self.attacking = True # Marcar que la secuencia de ataque está activa
-    #             self.can_initiate_new_action = False # No iniciar nuevas acciones hasta que termine el recovery
-    #             # self.horizontal_velocity = 0 # Detener movimiento al iniciar el ataque activo
-        
-    #     if self.attacking: # Si la secuencia de ataque está activa (después del windup)
-    #         self.can_move = False # O permitir movimiento muy lento durante algunos ataques
-    #         self.horizontal_velocity *= 0.2 # Reducir drásticamente velocidad si se permite algo de movimiento
-            
-    #         self.combo_timer += delta_time # Para el timeout del combo
-    #         # La animación de ataque avanza en update_animation_frame()
-    #         # El cambio de frames del combo y fin del ataque se maneja en update_animation_frame()
-
-    #     if self.in_attack_recovery:
-    #         self.can_move = True # Puede empezar a moverse en recovery, pero no atacar
-    #         self.horizontal_velocity *= 0.8 # Recuperar velocidad gradualmente
-    #         if current_time - self.attack_recovery_timer >= self.attack_recovery:
-    #             self.in_attack_recovery = False
-    #             self.can_initiate_new_action = True # Puede iniciar nuevas acciones
-    #             if not self.jumping : self.current_state = "idle" # Volver a idle si no hay otra acción
-    #             # self.current_combo = 1 # Resetear combo si no se continuó
-        
-    #     # --- Lógica de Movimiento y Salto (si `can_move` y `can_initiate_new_action` lo permiten) ---
-    #     # Aplicar gravedad y movimiento vertical (salto/caída)
-    #     # Esto debe ocurrir incluso si no se `can_move` horizontalmente (ej. durante un ataque en el aire)
-    #     if not self.on_ground or self.jumping:
-    #         self.vertical_velocity += settings.GRAVITY
-    #         self.y += self.vertical_velocity * (delta_time / 1000.0) # Aplicar delta_time
-
-    #     # Movimiento Horizontal (controlado por input, modificado por `can_move`)
-    #     if self.can_move:
-    #         self.x += self.horizontal_velocity * (delta_time / 1000.0)
-    #     else: # Si no puede moverse (ej. durante ataque), asegurar que la velocidad horizontal sea 0 o muy baja
-    #         if not self.attacking : self.horizontal_velocity = 0 # Detener completamente si no está en la parte activa del ataque
-
-    #     # Colisiones con el mundo
-    #     self.check_collision(solid_objects) # Ajustará X, Y, on_ground, vertical_velocity
-
-    #     # --- Actualización de Estados (basado en acciones y colisiones) ---
-    #     if not self.attacking and not self.in_attack_windup and not self.in_attack_recovery and not self.hurt:
-    #         if self.jumping: # Si está en el aire (saltando o cayendo)
-    #             if self.current_state != "jump":
-    #                 self.current_state = "jump"
-    #                 self.current_frame = 0 # Usar primer frame de salto
-    #         elif self.on_ground: # Si está en el suelo
-    #             if self.horizontal_velocity != 0 and self.can_move:
-    #                 if self.current_state != "run":
-    #                     self.current_state = "run"
-    #                     self.current_frame = 0
-    #             elif self.horizontal_velocity == 0: # O !self.can_move
-    #                 if self.current_state != "idle":
-    #                     self.current_state = "idle"
-    #                     self.current_frame = 0
-        
-    #     # Actualizar el frame de la animación actual
-    #     current_delay = settings.ANIMATIONS_DELAYS[self.current_state]
-
-    #     # Actualizar animacion
-    #     if self.animation_timer >= current_delay:
-    #         self.update_animation()
-    #         self.animation_timer = 0
-        
-    #     # Actualizar tamaño del rectangulo de colision, dependiendo de si esta atacando o no
-    #     rect_width = self.attack_rect_width if self.attacking else self.base_rect_width
-        
-    #     # Actualizar posicion del rectangulo de colisión
-    #     if self.direction == 1:
-    #         rect_x = self.x + self.rect_offset_x * 2 
-    #     else:
-    #         # correccion para que el rectangulo crezca a la izquierda
-    #         rect_x = self.x + (self.rect_offset_x * 2 - rect_width) + 11
-    #     # Actualizar posicion del rectangulo de colisión
-    #     if self.direction == 1:
-    #         rect_x = self.x + self.rect_offset_x * 2 
-    #     else:
-    #         # correccion para que el rectangulo crezca a la izquierda
-    #         rect_x = self.x + (self.rect_offset_x * 2 - rect_width) + 11
-        
-    #     # Crea el nuevo rectangulo de colision para el player (hay que actualizarlo cada vez que se mueve el player)  
-    #     self.king_rect = pygame.Rect(
-    #         rect_x, 
-    #         self.y + self.rect_offset_y, 
-    #         rect_width, 
-    #         self.base_rect_height
-    #     )
-    
-    #     # Actualizar el rectángulo del jugador
-    #     self.update_camera_rect()    
-    
+    # Metodo para aplicar knockback al jugador, es decir cuando recibe un golpe se mueve hacia atras
     def apply_knockback(self, delta_time, solid_objects):
         knockback_distance = self.knockback_direction * self.knockback_speed * (delta_time / 1000)
         
@@ -431,9 +313,10 @@ class Player:
             return
 
         # Este es igual al metodo render  , pasa que siguiendo el tutorial le pusieron draw y ya me da pereza cambiarlo XD
-        
+        if self.vertical_velocity > 0 and not self.on_ground and not self.horizontal_velocity > 0:
+            self.current_surface = self.animations["jump"][1]  # Frame 2 (índice 1)
         # Aqui es simple si esta atacando carga el frame correspondiente al movimiento de ataque actual
-        if self.attacking:
+        elif self.attacking:
             attack_frames = self.attack_moveset[f"attack{self.current_combo}"]
             self.current_surface = attack_frames[self.current_frame]
             
