@@ -25,9 +25,9 @@ class IntroState(BaseState):
         self.current_paragraph = 0
         self.waiting_for_input = False
         
-        # Variables para el texto en multiples líneas
         self.wrapped_lines = []
         self.current_line = 0
+        
         # Margen de 50px a cada lado
         self.max_width = settings.WINDOW_WIDTH - 100  
 
@@ -42,7 +42,7 @@ class IntroState(BaseState):
 
     def wrap_text(self, text):
         # Ajustar el ancho de las lineas
-        return textwrap.wrap(text, width=80) 
+        return textwrap.wrap(text, width=60) 
 
     def update(self, dt: float) -> None:
         # Manejar el fade in
@@ -83,7 +83,7 @@ class IntroState(BaseState):
                 # Espaciado entre lineas
                 y_position += 25  
 
-            # Mostrar indicador de "Presiona ENTER" cuando el texto está completo
+            # Mostrar indicador de "Presiona ENTER" cuando se completa el texo o pueda skipear
             if self.waiting_for_input:
                 settings.SOUNDS["maquinaescribir"].stop()
                 continue_text = self.font2.render("Presiona ENTER para continuar o 'X' para saltar Intro.......", True, (200, 200, 200))
@@ -114,7 +114,7 @@ class IntroState(BaseState):
                     self.fade_out = True
                     self.fade_alpha = 0
 
-        # Permitir saltar la intro con la tecla ESC
+        # Permitir saltar la intro con la tecla x
         if input_id == "x" and input_data.pressed:
             # Detener el sonido si se salta la intro
             settings.SOUNDS["maquinaescribir"].stop()

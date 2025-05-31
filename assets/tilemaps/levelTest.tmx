@@ -752,7 +752,6 @@
   <object id="105" name="NightBorne" x="589.333" y="193.333">
    <point/>
   </object>
-  <object id="106" name="obstacle" x="878" y="190.333" width="73.3333" height="3.33333"/>
   <object id="107" name="key" x="1895" y="179">
    <point/>
   </object>

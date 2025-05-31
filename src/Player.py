@@ -1,22 +1,27 @@
 import pygame
 import settings
-from src.globalUtilsFunctions import update_vertical_acceleration
+from src.globalUtilsFunctions import update_vertical_acceleration , extract_animation_complex_spritesheet
 from src.globalUtilsFunctions import extract_animation_moveset , extract_animation_unique_spritesheet
-import pytmx
+import settings
+
 
 class Player:
     
     def __init__(self, x, y):
+
+        # Variables para la animación de muerte
+        self.death_animation_completed = False
+        self.death_animation_timer = 0
 
         # Nuevos flags para mayor control:
         self.can_move = True # Puede ser False durante ciertas partes del ataque
         self.can_initiate_new_action = True # Para controlar cuándo se pueden iniciar nuevos saltos/ataques
         
         # Sistema de vida
-        self.max_health = 100
+        self.max_health = 10000
         self.current_health = self.max_health
         self.is_dead = False
-        self.attack_damage = 20  # Daño que hace el jugador
+        self.attack_damage = 100  # Daño que hace el jugador
         self.has_key = False
         self.has_door_key = False
 
@@ -98,7 +103,8 @@ class Player:
         self.on_ground = True
         self.horizontal_velocity = 0
         
-        scale_factor = 1.3 
+        scale_factor = settings.SCALE_FACTOR
+        self.scale_factor = settings.SCALE_FACTOR
         # Calcula el nuevo offset en Y para centrar el rectángulo con el sprite escalado
         # Suponiendo que el sprite original y el rectángulo estaban alineados antes del escalado:
         self.rect_offset_x = 35  # Puedes ajustar este valor si el rectángulo no está centrado horizontalmente
@@ -126,7 +132,17 @@ class Player:
         # Esta variable extra se centrara en el rectagulo original del player (ya que al atacar se alarga y genera dos coordenadas posibles y era un desastre con la camara)
         # Entonces esta variable sera estatica para guardar el punto de referencia de la camara para moverse en consecuencia al jugador
         self.camera_rect = self.king_rect
-    
+        
+        # Cargar animacion de muerte
+        self.load_death_animation()
+
+    def load_death_animation(self):
+        # Cargar la animacion de muerte
+        initial_sprite = 0
+        sprite_moveset_size = 4
+        death_animations = extract_animation_complex_spritesheet("DeathKnight", self.scale_factor)
+        self.animations["death"] = extract_animation_moveset(death_animations, (initial_sprite, sprite_moveset_size))
+        print(len(self.animations["death"]))
     # Verificador de colisiones con el mundo
     def check_collision(self, solid_objects:pygame.Rect):
         # Empezamos a recorrer el arreglo de solidos
@@ -145,7 +161,6 @@ class Player:
                 # Colision desde arriba (cayendo)
                 if min_dist == dist_top and self.vertical_velocity > 0:
                     print("colision suelo")
-                    print(self.current_health)
                     self.y = solid.top - self.king_rect.height - self.rect_offset_y
                     self.vertical_velocity = 0
                     self.jumping = False
@@ -175,12 +190,11 @@ class Player:
         # Logica para recibir el golpe, es decir si el jugador recibe un golpe se activa la variable hurt y se le asigna una direccion de knockback
         # Esto es para que el jugador no pueda recibir mas de un golpe al mismo tiempo, es decir si ya esta herido no puede volver a ser herido
         if not self.invulnerable:
-            
             self.hurt = True
             self.invulnerable = True
             self.invulnerable_timer = pygame.time.get_ticks()
             self.hurt_timer = pygame.time.get_ticks()
-            self.current_state = "idle"  
+            self.current_state = "idle"
             self.current_frame = self.hurt_frame
             self.knockback_direction = direction
 
@@ -189,11 +203,33 @@ class Player:
             if self.current_health <= 0:
                 self.is_dead = True
                 self.current_health = 0
+                self.current_state = "death"
+                self.current_frame = 0
+                self.death_animation_completed = False
+                self.death_animation_timer = pygame.time.get_ticks()
+                # Reproducir sonido de muerte
+                settings.SOUNDS["player_death"].play()
 
     # Metodo update donde actualiza los estados del player y verifica que cambios se hicieron en el 
     def update(self,delta_time,solid_objects):   
         # Aumentamos el tiempo de la animacion y el tiempo del combo 
         self.animation_timer += delta_time 
+        
+        # Si el jugador esta muerto
+        if self.is_dead:
+            if not self.death_animation_completed:
+                self.death_animation_timer += delta_time
+                
+                # Actualizar la animación de muerte
+                current_delay = settings.ANIMATIONS_DELAYS["death"]
+                if self.death_animation_timer >= current_delay:
+                    self.update_animation()
+                    self.death_animation_timer = 0
+                    
+                    # Verificar si la animación de muerte ha terminado
+                    if self.current_frame >= len(self.animations["death"]) - 1:
+                        self.death_animation_completed = True
+            return
                  
         # Si esta herido, aplicar knockback y controlar invulnerabilidad
         if self.hurt:          
@@ -310,7 +346,27 @@ class Player:
     def render(self, screen,camera_offset=None):
         # Si el jugador esta muerto no renderiza nada
         if self.is_dead:
+            if not self.death_animation_completed:
+                # Usar la animacion de muerte
+                current_surface = self.animations["death"][self.current_frame]
+                
+                if self.direction == -1:
+                    current_surface = pygame.transform.flip(current_surface, True, False)
+                    
+                x, y = camera_offset if camera_offset else (self.x, self.y)
+                y_render = y + self.rect_offset_y * 3
+                screen.blit(current_surface, (x, y_render))
+            if self.death_animation_completed:
+                current_surface = self.animations["death"][3]
+                
+                if self.direction == -1:
+                    current_surface = pygame.transform.flip(current_surface, True, False)
+                    
+                x, y = camera_offset if camera_offset else (self.x, self.y)
+                y_render = y + self.rect_offset_y * 3
+                screen.blit(current_surface, (x, y_render))
             return
+        
         # Si el jugador está herido y no es invulnerable, alternar la visibilidad del sprite
         if self.invulnerable and (pygame.time.get_ticks() // 100) % 2 == 0:
             return
@@ -377,7 +433,7 @@ class Player:
         
         # Cargar spritesheets del king en un array para automatizar las animaciones
         # cabe destacar que esta configurado para trabajar correctamente con 4 frames los ataques
-        scale_factor = 1.2
+        scale_factor = settings.SCALE_FACTOR
         
         self.sprite_sheets = {
             "run": settings.TEXTURES["kingRun"],

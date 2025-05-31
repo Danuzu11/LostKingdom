@@ -55,7 +55,7 @@ BASE_DIR = pathlib.Path(__file__).parent
 
 # Estos son los valores de la textura del player para recortar el ancho y alto del sprite
 # el ancho y alto de la textura del player
-SCALE_FACTOR = 2
+SCALE_FACTOR = 1.3
 
 # Configuración del jugador
 PLAYER_SPEED = 150
@@ -73,9 +73,10 @@ GRAVITY = 0.5
 
 ANIMATIONS_DELAYS = {
     "run": 100, 
-    "attack": 350, 
+    "attack": 400, 
     "jump": 300, 
-    "idle": 90
+    "idle": 120,
+    "death": 400,
 }
 
 
@@ -87,40 +88,57 @@ LEVELS = {
 }
 
 SOUNDS = {
+    # Sonidos de efectos
     "jump": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "jump.wav"),
     "timer": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "timer.wav"),
     "count": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "count.wav"),
     "win": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "win.wav"),
-    # "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "DreadMarch.wav"),
+    "deepgrowl": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "deepgrowl.mp3"),  
+    "player_death": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "player_death.mp3"),  
+    
+    # Sonidos de ataques 
     "slash1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash1.wav"),
     "slash2": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash2.wav"),
+    
+    # Temas de fondo
     "principal_theme1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "EclipsedDesolation.wav"),
     "menu_theme1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "CursedCitadel(Intro).wav"),
     "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "smoothMedieval.mp3"),
+    "maquinaescribir": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "maquinaescribir.mp3"),
+}
 
-     "maquinaescribir": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "maquinaescribir.mp3"),
+DEATH_SOUNDS = {
+    "Golem": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "rockDeath.mp3"),
+    "MechaGolem": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "rockDeath.mp3"),
+    "Executoner": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "parcDead.mp3"),
+    "NightBorne": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "nigthtsDead.mp3"),
+    "Minotaur": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "demonLaugh.mp3"),
 }
 
 # Generar textura del spritesheet
 TEXTURES = {
+
+    # TEXTURES para el jugador
     "kingRun": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingRun.png"),
     "kingAttack": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingAttacks.png"),
     "kingJump": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingJump.png"),
     "idle": pygame.image.load(BASE_DIR / "assets" / "textures" / "idle.png"),
     
+    # TEXTURES para muerte
+    "death": pygame.image.load(BASE_DIR / "assets" / "textures" / "deathAnimation" /"death.png"),
     
-    "enemyAnimations": pygame.image.load(BASE_DIR / "assets" / "textures" / "NightBorne.png"),
-    
+    # Frames para objetos animados
     "fireplace": pygame.image.load(BASE_DIR / "assets" / "textures" / "fireplace.png"),
     "torch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch.png"),
     "castleTorch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch_big" / "castleTorch.png"),
+    "castleTorch1": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch_big_blue" / "castleTorchBlue.png"),
     "key": pygame.image.load(BASE_DIR / "assets" / "textures" / "KeyIcons.png"),
     
-    #"menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "menu.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
+    # TEXTURES para las pantallas de menu, death y intro
     "menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "slayer.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
     "death2": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "death2.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
     "intro2": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "intro2.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
-  
+    "outro": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "outro2.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
 }
 
 
@@ -131,9 +149,29 @@ COMPLEX_TEXTURES = {
         "Attack": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingAttacks.png"),
         "Jump": pygame.image.load(BASE_DIR / "assets" / "textures" / "kingJump.png"),
     },
+
+    "Death":{
+        "Death": pygame.image.load(BASE_DIR / "assets" / "textures" / "deathAnimation" / "death.png"), 
+    },
+
+    "DeathKnight":{
+        "DeathKnight": pygame.image.load(BASE_DIR / "assets" / "textures" / "Death.png"), 
+    },
+        
+    "Golem_DeathB":{
+        "Golem_DeathB": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" / "Golem_DeathB.png"), 
+    },  
     
+    "ExecutoreDeathB" : {
+        "ExecutoreDeathB": pygame.image.load(BASE_DIR / "assets" / "textures" / "executoner" / "death.png"), 
+    },       
+     
     "NightBorne":{
         "NightBorne": pygame.image.load(BASE_DIR / "assets" / "textures" / "NightBorne.png"),
+    },
+    
+    "MechaGolem": {
+        "MechaGolem": pygame.image.load(BASE_DIR / "assets" / "textures" / "Mecha-stone Golem 0.1" / "mechaGolem.png"),
     },
     
     "Minotaur":{ 
@@ -146,7 +184,11 @@ COMPLEX_TEXTURES = {
         "Attack": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" / "Golem_AttackC.png"),
     },
 
-  
+    "Executoner":{
+        "Idle": pygame.image.load(BASE_DIR / "assets" / "textures" / "executoner" /"summonIdle.png"),
+        "Run": pygame.image.load(BASE_DIR / "assets" / "textures" / "executoner" /"idle2.png"),
+        "Attack": pygame.image.load(BASE_DIR / "assets" / "textures" / "executoner" /"attacking.png"),
+    },  
 }
 
 # AQUI MANEJAMOS EL ANALISIS PARA ENEMIGOS Y JUGADORES PERO UN POQUITO MAS COMPLEJO
@@ -159,11 +201,30 @@ COMPLEX_FRAMES = {
         "Attack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height - 6),
         "Jump": frames.generate_frames(TEXTURES["kingJump"], king_width, king_height - 6),
     },
-    
+
+    "Death":{
+        "Death": frames.generate_frames(COMPLEX_TEXTURES["Death"]["Death"], 64, 64),
+    },
+
+    "DeathKnight":{
+        "DeathKnight": frames.generate_frames(COMPLEX_TEXTURES["DeathKnight"]["DeathKnight"], 128, 64),
+    },
+        
+    "ExecutoreDeathB":{
+        "ExecutoreDeathB": frames.generate_frames(COMPLEX_TEXTURES["ExecutoreDeathB"]["ExecutoreDeathB"], 100, 100),
+    },
+        
+    "Golem_DeathB":{
+        "Golem_DeathB": frames.generate_frames(COMPLEX_TEXTURES["Golem_DeathB"]["Golem_DeathB"], 64, 64),
+    },  
     "NightBorne":{
         "NightBorne": frames.generate_frames(COMPLEX_TEXTURES["NightBorne"]["NightBorne"], enemy1_width, enemy1_height),
     },
     
+    "MechaGolem":{
+        "MechaGolem": frames.generate_frames(COMPLEX_TEXTURES["MechaGolem"]["MechaGolem"], 100, 100),
+    },  
+     
     "Minotaur":{
         "Minotaur": frames.generate_frames(COMPLEX_TEXTURES["Minotaur"]["Minotaur"], 288 , 160),
     },
@@ -173,43 +234,65 @@ COMPLEX_FRAMES = {
         "Run":  frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Run"], 64 , 64),        
         "Attack": frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Attack"], 64 , 64),
     },
-
+    
+    "Executoner":{
+        "Idle":  frames.generate_frames(COMPLEX_TEXTURES["Executoner"]["Idle"], 50 , 50),  
+        "Run":  frames.generate_frames(COMPLEX_TEXTURES["Executoner"]["Run"], 100 , 100),        
+        "Attack": frames.generate_frames(COMPLEX_TEXTURES["Executoner"]["Attack"], 100 , 100),
+    },  
 }
 
 # Generar frames del sprite
 FRAMES = {
+    # Frames para el jugador
     "kingRun":  frames.generate_frames(TEXTURES["kingRun"], king_width , king_height - 6),        
     "kingAttack": frames.generate_frames(TEXTURES["kingAttack"], king_width , king_height - 6),
     "kingJump": frames.generate_frames(TEXTURES["kingJump"], king_width, king_height - 6),
-    
-    "enemyAnimations": frames.generate_frames(TEXTURES["enemyAnimations"], enemy1_width, enemy1_height),
-    
     "idle": frames.generate_frames(TEXTURES["idle"], king_width , king_height - 6),
+    
+    # Frames para objetos animados
     "fireplace": frames.generate_frames(TEXTURES["fireplace"], 64, 64),
     "torch": frames.generate_frames(TEXTURES["torch"], 64, 64),  
     "castleTorch": frames.generate_frames(TEXTURES["castleTorch"], 12, 42),
-    "key": frames.generate_frames(TEXTURES["key"], 31, 31),
+    "castleTorch1": frames.generate_frames(TEXTURES["castleTorch1"], 12, 42),
     
+    # Frames para muerte
+    "death": frames.generate_frames(TEXTURES["menu"], 64, 64),
+    "key": frames.generate_frames(TEXTURES["key"], 31, 31),
 }
-
 
 
 ANIMATIONS_ENEMY_DELAYS = {
     "NightBorne": {
-        "idle": 80,
-        "run": 80,
-        "attack": 50,
+        "idle": 100,
+        "run": 100,
+        "attack": 80,
+        "death": 100,
     },
     "Golem": {
-        "idle": 80,
-        "run": 80,
-        "attack": 50,
+        "idle": 100,
+        "run": 100,
+        "attack": 100,
+        "death": 80,
     },
     "Minotaur": {
         "idle": 100,
         "run": 100,
         "attack": 150,
+        "death": 100,
     },
+    "MechaGolem": {
+        "idle": 100,
+        "run": 100,
+        "attack": 100,
+        "death": 100,
+    },
+    "Executoner": {
+        "idle": 180,
+        "run": 100,
+        "attack": 100,
+        "death": 100,
+    }
 }
 
 
@@ -234,16 +317,23 @@ ANIMATED_DECORATIONS = {
         "correctionX" : 5,
         "correctionY" : 40,  
     },
+
+    "castleTorchBlue" : {
+        "texture" : TEXTURES["castleTorch1"] ,
+        "frames" : FRAMES["castleTorch1"] ,
+        "correctionX" : 5,
+        "correctionY" : 40,  
+    },
+    
     "key" : {
         "texture" : TEXTURES["key"] ,
         "frames" : FRAMES["key"] ,
         "correctionX" : 0,
         "correctionY" : 0,
     },
-
-    
 }
 
+ANIMATED_DECORATIONS_INDEX = ["fireplace", "torch","castleTorch","castleTorchBlue"]
 
 
 # Inicializar fuentes

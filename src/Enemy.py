@@ -7,6 +7,10 @@ from src.definitions.enemies import Enemies
 class Enemy:
     def __init__(self, x, y, name):
         
+        # Agregar estado de muerte
+        self.death_animation_completed = False
+        self.death_animation_timer = 0
+        self.start_death = False
         # TENGAMOS EN CUENTA QUE PARA AGREGAR MAS ENEMIGOS DEBEMOS AGREGAR LA DEFINICIONES EN ENEMIES.PY
         # ESTO PARA DEFINIR SUS VALORES DE VIDA ESCALA Y CORRECIONES DE POSICION
           
@@ -197,13 +201,43 @@ class Enemy:
             enemy_animations = extract_animation_unique_spritesheet("Golem","Run",self.scale_factor)
             self.animations["run"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
             
-            # attack moveset (para los enemigos es un unico ataque)
-                      
+            # attack moveset (para los enemigos es un unico ataque)           
             initial_sprite = 0
             sprite_moveset_size = 5
             enemy_animations = extract_animation_unique_spritesheet("Golem","Attack",self.scale_factor)
             self.animations["attack"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
             
+            #animacion de muerte
+            initial_sprite = 0
+            sprite_moveset_size = 7
+            enemy_animations = extract_animation_complex_spritesheet("Golem_DeathB", self.scale_factor)
+            self.animations["death"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+        
+        elif self.name == "Executoner":
+            # idle moveset
+            enemy_animations = extract_animation_unique_spritesheet("Executoner","Idle",self.scale_factor)
+            initial_sprite = 0
+            sprite_moveset_size = 4
+            self.animations["idle"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+            
+            # run moveset 
+            initial_sprite = 0
+            sprite_moveset_size = 7
+            enemy_animations = extract_animation_unique_spritesheet("Executoner","Run",self.scale_factor)
+            self.animations["run"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+            
+            # attack moveset (para los enemigos es un unico ataque)           
+            initial_sprite = 0
+            sprite_moveset_size = 12
+            enemy_animations = extract_animation_unique_spritesheet("Executoner","Attack",self.scale_factor)
+            self.animations["attack"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+            
+            #animacion de muerte
+            initial_sprite = 0
+            sprite_moveset_size = 18
+            enemy_animations = extract_animation_complex_spritesheet("ExecutoreDeathB", self.scale_factor)
+            self.animations["death"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))  
+                                 
         elif self.name == "NightBorne":
             # idle moveset
             initial_sprite = 0
@@ -222,7 +256,13 @@ class Enemy:
             sprite_moveset_size = 6
             enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
             self.animations["attack"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
-        
+            
+            #animacion de muerte
+            initial_sprite = 92
+            sprite_moveset_size = 22
+            enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
+            self.animations["death"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+              
         elif self.name == "Minotaur":
             # idle moveset
             initial_sprite = 0
@@ -238,10 +278,43 @@ class Enemy:
             
             # attack moveset
             initial_sprite = 33
-            sprite_moveset_size = 33 + 9
+            sprite_moveset_size = 9
+            enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
+            self.animations["attack"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+
+            #animacion de muerte
+            initial_sprite = 60
+            sprite_moveset_size = 11  
+            enemy_animations = extract_animation_complex_spritesheet("Death", self.scale_factor)
+            self.animations["death"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+        
+        elif self.name == "MechaGolem":
+            # idle moveset
+            initial_sprite = 0
+            sprite_moveset_size = initial_sprite + 4
+            enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
+            self.animations["idle"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+            
+            # run moveset
+            initial_sprite = 60
+            sprite_moveset_size = 9
+            enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
+            self.animations["run"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+            
+            # attack moveset
+            initial_sprite = 40
+            sprite_moveset_size = 7
             enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
             self.animations["attack"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
             
+            #animacion de muerte
+            initial_sprite = 70
+            sprite_moveset_size = 13
+            enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
+            self.animations["death"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
+        
+
+                    
     # Actualiza el rectangulo de colision
     def update_rect(self):
   
@@ -269,7 +342,8 @@ class Enemy:
     # Verifica la colision con el jugador
     def check_collision_with_player(self, player):
         self.update_rect()
-        if self.rect.colliderect(player.king_rect):  
+        if self.rect.colliderect(player.king_rect): 
+            print("colisiono con el jugador") 
             return True
         else:
             return False
@@ -298,10 +372,10 @@ class Enemy:
         """
         # Crear un rectángulo de detección adelante del enemigo en la dirección de movimiento
         ground_check = pygame.Rect(
-            self.rect.x + ((self.rect.width + 10) * self.direction) ,  # Posicion adelante en la dirección de movimiento
+            self.rect.x + (10 * self.direction) ,  # Posicion adelante en la dirección de movimiento
             self.rect.bottom ,
             self.rect.width,
-            25  # Altura pequeña para la detección
+            25  # Altura pequeña para la deteccion
         )
         
         # Verificar si hay algún objeto sólido debajo
@@ -312,7 +386,27 @@ class Enemy:
     
     def update(self, delta_time, player, solid_objects):
         # Si el enemigo esta muerto, no actualizar
-        if self.is_dead:
+        
+        if self.is_dead:      
+            if not self.start_death:
+                settings.DEATH_SOUNDS[self.name].play()
+                self.start_death = True
+                 
+            if not self.death_animation_completed:
+                self.current_state = "death"
+                self.death_animation_timer += delta_time
+                
+                # Actualizar la animación de muerte
+                current_delay = settings.ANIMATIONS_ENEMY_DELAYS[self.name]["death"]
+                if self.death_animation_timer >= current_delay:
+                    self.update_animation(delta_time)
+                    self.death_animation_timer = 0
+                    
+                    # Verificar si la animación de muerte ha terminado
+                    if self.current_frame >= len(self.animations["death"]) - 1:
+                        self.death_animation_completed = True
+                 
+     
             return
          
         self.animation_timer += delta_time 
@@ -409,6 +503,8 @@ class Enemy:
         self.direction = planned_direction # Siempre actualizar la dirección basada en la última lógica de orientación
         
         # Logica de ataque (funciona independientemente de si hay suelo o no)
+        # print(f"distancia: ",distance_to_player)
+        # print(f"rango: ",distance_to_player)
         if distance_to_player <= self.attack_range and in_range_player and has_vision  :
             if not self.attacking and (current_time - self.last_attack_time >= self.attack_cooldown):
                 self.current_state = "attack"
@@ -456,13 +552,21 @@ class Enemy:
         
         self.update_rect()
         
-
     def update_animation(self, delta_time):
         self.current_frame = (self.current_frame + 1) % len(self.animations[self.current_state])
 
     def draw(self, screen, camera_offset=(0, 0), player=None, solid_objects=None):
     
         if self.is_dead:
+            if not self.death_animation_completed:
+                # Usar la animacion de muerte del diccionario de animaciones
+                current_surface = self.animations["death"][self.current_frame]
+                
+                if self.direction == -1:
+                    current_surface = pygame.transform.flip(current_surface, True, False)
+                    
+                offset = camera_offset if camera_offset else (0, 0)
+                screen.blit(current_surface, (self.x - offset[0], self.y - offset[1] - self.floor_correct))
             return
         
         self.render_health_bar(self.x, self.y, screen, camera_offset)
@@ -492,43 +596,25 @@ class Enemy:
         ground_check = pygame.Rect(
             self.rect.x + ((self.rect.width + 10) * self.direction)  - offset[0],
             self.rect.bottom - offset[1],
-            self.rect.width,
+            25,
             25
         )
         pygame.draw.rect(screen, (0, 255, 0), ground_check, 2)
         
-        if player is not None:
-            enemy_pos = (self.rect.centerx - camera_offset[0], self.rect.centery - camera_offset[1])
-            player_pos = (player.king_rect.centerx - camera_offset[0], player.king_rect.centery - camera_offset[1])
-            pygame.draw.line(screen, (255, 255, 0), enemy_pos, player_pos, 2)  # Línea amarilla
-        
-        for solid in solid_objects:
-            if not isinstance(solid, pygame.Rect):
-                solid = pygame.Rect(solid.x, solid.y, solid.width, solid.height)
-            clipped = solid.clipline(enemy_pos, player_pos)
-            if clipped:
-                # Dibuja el segmento recortado en rojo
-                pygame.draw.line(screen, (255, 0, 0), 
-                                (clipped[0][0] - camera_offset[0], clipped[0][1] - camera_offset[1]),
-                                (clipped[1][0] - camera_offset[0], clipped[1][1] - camera_offset[1]), 3) 
-                          
-        # --- DEBUG: Línea de visión y sólidos ---
-        # if player is not None and solid_objects is not None:
-        #     # Coordenadas ajustadas por la cámara
+        # if player is not None:
         #     enemy_pos = (self.rect.centerx - camera_offset[0], self.rect.centery - camera_offset[1])
         #     player_pos = (player.king_rect.centerx - camera_offset[0], player.king_rect.centery - camera_offset[1])
-        #     # Línea de visión (amarillo)
-        #     pygame.draw.line(screen, (255, 255, 0), enemy_pos, player_pos, 2)
-        #     # Sólidos (azul)
-        #     for solid in solid_objects:
-        #         solid_rect = pygame.Rect(solid.x, solid.y, solid.width, solid.height)
-        #         draw_rect = pygame.Rect(
-        #             solid_rect.x - camera_offset[0],
-        #             solid_rect.y - camera_offset[1],
-        #             solid_rect.width,
-        #             solid_rect.height
-        #         )
-        #         pygame.draw.rect(screen, (0, 0, 255), draw_rect, 2)                    
+        #     pygame.draw.line(screen, (255, 255, 0), enemy_pos, player_pos, 2)  # Línea amarilla
+        
+        # for solid in solid_objects:
+        #     if not isinstance(solid, pygame.Rect):
+        #         solid = pygame.Rect(solid.x, solid.y, solid.width, solid.height)
+        #     clipped = solid.clipline(enemy_pos, player_pos)
+        #     if clipped:
+        #         # Dibuja el segmento recortado en rojo
+        #         pygame.draw.line(screen, (255, 0, 0), 
+        #                         (clipped[0][0] - camera_offset[0], clipped[0][1] - camera_offset[1]),
+        #                         (clipped[1][0] - camera_offset[0], clipped[1][1] - camera_offset[1]), 3)                                        
     
     def render_health_bar(self, x,y,screen,camera_offset):
         # Renderiza la barra de vida del enemigo
@@ -544,7 +630,7 @@ class Enemy:
                            (bar_x, bar_y, health_bar_width, health_bar_height))
             
         # Vida actual (verde)
-        pygame.draw.rect(screen, (255, 0, 0), 
+        pygame.draw.rect(screen, (0, 255, 0), 
                            (bar_x, bar_y, health_bar_width * health_ratio, health_bar_height))
         
     # Determina si hay un objeto solido en la linea de vision del enemigo y el jugador 
@@ -559,86 +645,3 @@ class Enemy:
                 return False
         return True
 
-    # def has_line_of_sight(self, player, solid_objects):
-    #     # Obtener las posiciones centrales
-    #     enemy_pos = (self.rect.centerx, self.rect.centery)
-    #     player_pos = (player.king_rect.centerx, player.king_rect.centery)
-        
-    #     # Crear una línea de visión
-    #     vision_line = pygame.math.Vector2(player_pos[0] - enemy_pos[0], player_pos[1] - enemy_pos[1])
-        
-    #     # Verificar cada objeto sólido
-    #     for solid in solid_objects:
-    #         # Asegurarse de que el objeto es un Rect
-    #         if not isinstance(solid, pygame.Rect):
-    #             solid = pygame.Rect(solid.x, solid.y, solid.width, solid.height)
-            
-    #         # Obtener los puntos de intersección
-    #         intersections = []
-            
-    #         # Verificar cada borde del rectángulo
-    #         edges = [
-    #             ((solid.left, solid.top), (solid.right, solid.top)),     # Borde superior
-    #             ((solid.right, solid.top), (solid.right, solid.bottom)), # Borde derecho
-    #             ((solid.right, solid.bottom), (solid.left, solid.bottom)), # Borde inferior
-    #             ((solid.left, solid.bottom), (solid.left, solid.top))    # Borde izquierdo
-    #         ]
-            
-    #         for edge_start, edge_end in edges:
-    #             # Convertir a vectores
-    #             edge = pygame.math.Vector2(edge_end[0] - edge_start[0], edge_end[1] - edge_start[1])
-    #             start_to_enemy = pygame.math.Vector2(enemy_pos[0] - edge_start[0], enemy_pos[1] - edge_start[1])
-                
-    #             # Calcular el punto de intersección
-    #             if edge.length() > 0:  # Evitar división por cero
-    #                 t = start_to_enemy.dot(edge) / edge.length() ** 2
-    #                 if 0 <= t <= 1:
-    #                     intersection = (
-    #                         edge_start[0] + t * edge.x,
-    #                         edge_start[1] + t * edge.y
-    #                     )
-    #                     intersections.append(intersection)
-            
-    #         # Si hay intersecciones, verificar si están entre el enemigo y el jugador
-    #         for intersection in intersections:
-    #             # Calcular vectores desde el enemigo al punto de intersección y al jugador
-    #             to_intersection = pygame.math.Vector2(
-    #                 intersection[0] - enemy_pos[0],
-    #                 intersection[1] - enemy_pos[1]
-    #             )
-    #             to_player = pygame.math.Vector2(
-    #                 player_pos[0] - enemy_pos[0],
-    #                 player_pos[1] - enemy_pos[1]
-    #             )
-                
-    #             # Verificar si el punto de intersección está entre el enemigo y el jugador
-    #             if (to_intersection.length() <= to_player.length() and
-    #                 to_intersection.dot(to_player) > 0):
-    #                 return False
-        
-    #     return True
-
-    # def has_line_of_sight(self, player, solid_objects: list) -> bool:
-    #     # Usa la lista filtrada de solid_objects
-    #     # Puntos para el rayo de visión (desde el centro del enemigo al centro del jugador)
-    #     # Usar el rect base del enemigo para el origen del rayo
-    #     enemy_body_rect_x = self.x + self.enemy_rect_offset_x
-    #     # if self.direction == -1: # Si mira a la izquierda, el offset es el mismo para el rect base
-    #         # enemy_body_rect_x = self.x + self.enemy_rect_offset_x
-            
-    #     enemy_body_rect = pygame.Rect(enemy_body_rect_x, self.y + self.enemy_rect_offset_y,
-    #                                   self.base_rect_width, self.base_rect_height)
-
-    #     p1 = enemy_body_rect.center
-    #     p2 = player.king_rect.center
-
-    #     # Verificar la altura primero (optimización)
-    #     if abs(p1[1] - p2[1]) > self.detection_range: # Si la diferencia de altura es muy grande
-    #          return False
-
-
-    #     for solid in solid_objects:
-    #         # El método clipline es bueno. solid ya es un pygame.Rect.
-    #         if solid.clipline(p1, p2):
-    #             return False  # Hay un objeto bloqueando la línea de visión
-    #     return True

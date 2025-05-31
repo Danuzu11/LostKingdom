@@ -17,8 +17,15 @@ class PlayState(BaseState):
         self.fade_surface = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
         self.fade_surface.fill((0, 0, 0))
         self.fade_speed = 3
-       
         self.door_trigger = None
+        self.fade_in = True
+        self.fade_out = False
+        
+        # Velocidad más lenta para el fade out
+        self.fade_out_speed = 0.7
+         # Para saber porque se esta haciendo el fade out
+        self.fade_out_reason = None 
+        
          # Lista de niveles disponibles
         self.available_levels = list(settings.LEVELS.keys())
         self.current_level_index = 0  
@@ -43,108 +50,6 @@ class PlayState(BaseState):
             self.current_level_index = 0
             self.load_level(self.available_levels[self.current_level_index])
             
-            
-            # Inicializar variables del juego
-            # self.transition = True
-            # self.current_tile_map = TileMap("intro")
-            # # self.current_tile_map = TileMap("roomboss")
-            # self.map_image = self.current_tile_map.make_map()
-            # self.map_rect = self.map_image.get_rect()
-            # self.mask_objects = []
-            
-            
-            # # Escalar el mapa si el mapa creado es mucho mas peque;o que la pantalla
-            # scale_factor = settings.VIRTUAL_HEIGHT / self.current_tile_map.height
-            
-            # # El tama;o maximo de altura sera 16 en tile (relacion por la ventana que tenemos)
-            # max_tile_height = 16
-            # max_pixel_height = max_tile_height * self.current_tile_map.tmx_data.tileheight
-            
-            # # Si el mapa es mas grande no hara ningun reescalado
-            # if self.current_tile_map.height > max_pixel_height:
-            #     scale_factor = 1
-            # # scale_factor = 1
-            # # Inicializar la cámara
-            # self.camera = Camera()
-            # self.camera.set_world_size(self.map_image.get_width(), self.map_image.get_height())
-
-            # # Inicializar el jugador
-            # self.player_x, self.player_y = 0, 0
-            # self.solid_objects = []
-            # self.animated_items = []
-            # self.object_animations = {}
-            # self.enemies = []
-
-            # # Cargar animaciones de objetos (spritesheets cargados desde settings.py)
-            # for spritesheet_name, spritesheet_data in settings.ANIMATED_DECORATIONS.items():
-            #     spritesheet = spritesheet_data["texture"]
-            #     frames = spritesheet_data["frames"]
-            #     animation_frames = []
-            #     for frame in frames:
-            #         surface = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
-            #         surface.blit(spritesheet, (0, 0), frame)
-            #         animation_frames.append(surface)
-            #     self.object_animations[spritesheet_name] = animation_frames
-
-            # # Cargar objetos del mapa
-            # for objects in self.current_tile_map.tmx_data.objects:
-            #     if objects.name == "Player":
-            #         self.player_x = objects.x * scale_factor
-            #         self.player_y = objects.y * scale_factor
-            #     elif objects.name == "obstacle":
-            #         solid_rect = pygame.Rect(
-            #             objects.x * scale_factor,
-            #             objects.y * scale_factor,
-            #             objects.width * scale_factor,
-            #             objects.height * scale_factor,
-            #         )
-            #         self.solid_objects.append(solid_rect)
-            #     elif objects.name in ["fireplace", "torch","castleTorch"]:
-            #         animated_item = AnimatedItem(
-            #             objects.x * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionX"],
-            #             objects.y * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionY"],
-            #             self.object_animations[objects.name],
-            #             animation_delay=150,
-            #         )
-            #         self.animated_items.append(animated_item)
-                
-            #     elif objects.name == "NightBorne":
-            #         enemy = Enemy(
-            #             objects.x * scale_factor,
-            #             objects.y * scale_factor,
-            #             "NightBorne",
-            #         )
-            #         self.enemies.append(enemy)
-            #     elif objects.name == "Golem":
-            #         enemy = Enemy(
-            #             objects.x * scale_factor,
-            #             objects.y * scale_factor,
-            #             "Golem",
-            #         )
-            #         self.enemies.append(enemy)
-            #     elif objects.name == "Minotaur":
-            #         enemy = Enemy(
-            #             objects.x * scale_factor,
-            #             objects.y * scale_factor,
-            #             "Minotaur",
-            #         )
-            #         self.enemies.append(enemy)
-                               
-            #     elif objects.name == "mask":
-            #         mask_rect = pygame.Rect(
-            #             objects.x * scale_factor,
-            #             objects.y * scale_factor,
-            #             objects.width * scale_factor,
-            #             objects.height * scale_factor,
-            #         )
-            #         self.mask_objects.append(mask_rect)
-        
-            # # Indica que estamos haciendo fade in
-            # self.fade_in = True
-            
-            # # Inicializar el jugador
-            # self.player = Player(self.player_x, self.player_y)
-
 
     def load_level(self, level_name):
         """Carga un nuevo nivel"""
@@ -154,9 +59,6 @@ class PlayState(BaseState):
         self.animated_items = []
         self.enemies = []
         self.mask_objects = []
-
-      
-     
         
         # Cargar el nuevo nivel
         self.current_tile_map = TileMap(level_name)
@@ -175,12 +77,15 @@ class PlayState(BaseState):
             # Si el mapa es mas grande no hara ningun reescalado
         if self.current_tile_map.height > max_pixel_height:
             scale_factor = 1
+            settings.SCALE_FACTOR = 1
+        else:
+            settings.SCALE_FACTOR = 1.3
             # scale_factor = 1
             # Inicializar la cámara
         self.camera = Camera()
         self.camera.set_world_size(self.map_image.get_width(), self.map_image.get_height())
 
-            # Inicializar el jugador
+        # Inicializar el jugador
         self.player_x, self.player_y = 0, 0
         self.solid_objects = []
         self.animated_items = []
@@ -204,25 +109,25 @@ class PlayState(BaseState):
                 self.player_x = objects.x * scale_factor
                 self.player_y = objects.y * scale_factor
             elif objects.name == "obstacle":
-                print(objects.id)
+                # print(objects.id)
                 solid_rect = pygame.Rect(
                     objects.x * scale_factor,
                     objects.y * scale_factor,
                     objects.width * scale_factor,
                     objects.height * scale_factor,
-                    
                 )
                 self.solid_objects.append(solid_rect)
-
             elif objects.name == "door_trigger":
                 self.door_trigger = pygame.Rect(
-                    objects.x * scale_factor,
-                    objects.y * scale_factor,
-                    objects.width * scale_factor,
-                    objects.height * scale_factor,
+                            objects.x * scale_factor,
+                            objects.y * scale_factor,
+                            objects.width * scale_factor,
+                            objects.height * scale_factor,
                 )
-           
-            elif objects.name in ["fireplace", "torch","castleTorch","key"]:
+               
+                self.solid_objects.append(solid_rect)
+                
+            elif objects.name in settings.ANIMATED_DECORATIONS:
                 animated_item = AnimatedItem(
                     objects.x * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionX"],
                     objects.y * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionY"],
@@ -239,7 +144,6 @@ class PlayState(BaseState):
                     "NightBorne",
                 )
                 self.enemies.append(enemy)
-                
             elif objects.name == "Golem":
                 enemy = Enemy(
                     objects.x * scale_factor,
@@ -254,7 +158,20 @@ class PlayState(BaseState):
                     "Minotaur",
                 )
                 self.enemies.append(enemy)
-                            
+            elif objects.name == "MechaGolem":
+                enemy = Enemy(
+                    objects.x * scale_factor,
+                    objects.y * scale_factor,
+                    "MechaGolem",
+                )
+                self.enemies.append(enemy) 
+            elif objects.name == "Executoner":
+                enemy = Enemy(
+                    objects.x * scale_factor,
+                    objects.y * scale_factor,
+                    "Executoner",
+                )
+                self.enemies.append(enemy)                           
             elif objects.name == "mask":
                 mask_rect = pygame.Rect(
                     objects.x * scale_factor,
@@ -269,13 +186,14 @@ class PlayState(BaseState):
         
         # Inicializar el jugador
         # Solo crear un nuevo jugador si no existe uno
-        if not hasattr(self, 'player'):
-            self.player = Player(self.player_x, self.player_y)
-        else:
-            # Actualizar la posición del jugador existente
-            self.player.x = self.player_x
-            self.player.y = self.player_y
-
+        # if not hasattr(self, 'player'):
+        #     self.player = Player(self.player_x, self.player_y)
+        # else:
+        #     # Actualizar la posición del jugador existente
+        #     self.player.x = self.player_x
+        #     self.player.y = self.player_y
+        # Inicializar el jugador
+        self.player = Player(self.player_x, self.player_y)   
     
     # Ahora sí podemos establecer has_key
         self.player.has_key = False
@@ -322,6 +240,9 @@ class PlayState(BaseState):
                 print("¡Necesitas la llave para avanzar al siguiente nivel!")
             elif not self.door_trigger or not self.player.king_rect.colliderect(self.door_trigger):
                 print("¡Debes estar frente a la puerta!")
+                current_tile_map=self.current_tile_map,
+                map_image=self.map_image
+            
 
         if input_id == "enter" and input_data.pressed:
             self.state_machine.change("menu")  # Cambiar al estado de menú
@@ -370,7 +291,7 @@ class PlayState(BaseState):
                 self.player.current_frame = 0
                 self.player.attacking = False
                         
-        elif input_id == "x" and not self.player.jumping and self.player.horizontal_velocity == 0 :
+        elif input_id == "x" and not self.player.jumping and self.player.horizontal_velocity == 0 and not self.player.current_state == "jump":
             random_attack = 1
             # Validamos si no estamos atacando ya , si el player no se encuentra atacando entonces comienza el ataque en combo
             if not self.player.attacking:
@@ -418,13 +339,38 @@ class PlayState(BaseState):
             self.fade_alpha = max(0, self.fade_alpha - self.fade_speed)
             if self.fade_alpha == 0:
                 self.fade_in = False
-
-        if self.player.current_health <= 0: 
+                
+        if self.player.current_health <= 0 and self.player.death_animation_completed: 
             self.state_machine.change(
                 "game_over"
             )   
             return
+                  
+        # Manejar el fade out
+        if self.fade_out:
+            self.fade_alpha = min(255, self.fade_alpha + self.fade_out_speed)
+            if self.fade_alpha == 255:
+                self.fade_out = False
+                if self.fade_out_reason == "next_level":
+                    print("siguierte")
+                elif self.fade_out_reason == "victory":
+                    self.state_machine.change("outro")
+              
+
         
+        # Verificar si el jefe final ha sido derrotado
+        if self.current_level_index == len(self.available_levels) - 1: 
+            boss_defeated = True
+            for enemy in self.enemies:
+                if enemy.name == "Minotaur" and enemy.current_health > 0: 
+                    boss_defeated = False
+                    break
+            
+            if boss_defeated and not self.fade_out:
+                self.fade_out = True
+                self.fade_out_reason = "victory"
+                self.fade_alpha = 0
+
         delta_time = dt * 1000
 
         # Quadtree para Colisiones ---
@@ -571,7 +517,6 @@ class PlayState(BaseState):
             # Asumiendo que Enemy tiene un método get_world_rect() o atributos x,y,width,height
             # enemy_world_rect = enemy.get_world_rect() # Idealmente
             # O si tiene .rect que está en coordenadas del mundo:
-            
             if hasattr(enemy, 'rect') and camera_view_rect.colliderect(enemy.rect):
                 enemy.draw(surface, (self.camera.offset_x, self.camera.offset_y),self.player,self.solid_objects)
             elif hasattr(enemy, 'x') and hasattr(enemy, 'current_surface'): # Si tiene x,y y una superficie actual
@@ -599,7 +544,7 @@ class PlayState(BaseState):
             pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
         
         # Aplicar el fade in
-        if self.fade_in:
+        if self.fade_in or self.fade_out:
             self.fade_surface.set_alpha(self.fade_alpha)
             surface.blit(self.fade_surface, (0, 0))
 

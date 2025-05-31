@@ -30,7 +30,7 @@ Enemies = {
             "max_health": 100,
             "attack_range": 60,
             "detection_range": 100,
-            "attack_damage": 1,
+            "attack_damage": 13,
             
             # Corecccion de la barra de vida del enemigo
             "health_bar_offset_x": 40,   
@@ -53,7 +53,7 @@ Enemies = {
             "enemy_rect_offset_y": -45,
             
             # Agranda el rectangulo de colision para los ataques fisicos
-            "attack_rect_width": 60,
+            "attack_rect_width": 80,
             
             # Correccion extra para la posicion en y , para acomodar el sprite del enemigo en Y
             "extra_custom_offset_y": -60,
@@ -65,7 +65,7 @@ Enemies = {
             "max_health": 200,
             "attack_range": 60,
             "detection_range": 200,
-            "attack_damage": 1,
+            "attack_damage": 10,
             
             # Correcion en la posicion del piso base del enemigo para que no cambie segun su rectangulo de colision
             "floor_correct": 70,
@@ -82,15 +82,15 @@ Enemies = {
         "position_x_correct": 250,
             
         # Tama;o base ancho y alto del rectangulo de colision del enemigo
-        "base_rect_width": 50,
+        "base_rect_width": 60,
         "base_rect_height": 85,
             
         # Tama;os para los offset del rectangulo de colision (acomodar su posicion inicial en el sprite del enemigo y se vea mas acorde)
-        "enemy_rect_offset_x": 220 , 
+        "enemy_rect_offset_x": 180 , 
         "enemy_rect_offset_y": -95,
             
         # Agranda el rectangulo de colision para los ataques fisicos
-        "attack_rect_width": 100,
+        "attack_rect_width": 200,
             
         # Correccion extra para la posicion en y , para acomodar el sprite del enemigo en Y
         "extra_custom_offset_y": -185,
@@ -99,16 +99,91 @@ Enemies = {
         "scale_factor": 1.8,
             
         # Datos base del enemigo
-        "max_health": 200,
-        "attack_range": 60,
-        "detection_range": 1,
+        # "max_health": 200,
+        "max_health": 100,
+        "attack_range": 10,
+        "detection_range": 200,
         "attack_damage": 30,
             
         # Correcion en la posicion del piso base del enemigo para que no cambie segun su rectangulo de colision
         "floor_correct": 70,
             
         # Correcccion de la barra de vida del enemigo
-        "health_bar_offset_x": -45,   
+        "health_bar_offset_x": 45,   
+        "health_bar_offset_y": 0,
+    },
+    "MechaGolem": {
+        "speed": settings.ENEMY_SPEED,
+        "delay": settings.ANIMATIONS_ENEMY_DELAYS,
+        
+        # Corrección de posición en x
+        "position_x_correct": 80,
+        
+        # Tamaño base del rectángulo de colisión
+        "base_rect_width": 50,
+        "base_rect_height": 45,
+        
+        # Offset del rectángulo de colisión
+        "enemy_rect_offset_x": 50,
+        "enemy_rect_offset_y": -45,
+        
+        # Rectángulo de ataque
+        "attack_rect_width": 60,
+        
+        # Corrección extra para la posición en Y
+        "extra_custom_offset_y": -45,
+        
+        # Factor de escalado
+        "scale_factor": 1.5,
+        
+        # Datos base del enemigo
+        "max_health": 150,
+        "attack_range": 60,
+        "detection_range": 200,
+        "attack_damage": 10,
+        
+        # Correccion del piso
+        "floor_correct": 70,
+        
+        # Corrección de la barra de vida
+        "health_bar_offset_x": 40,
+        "health_bar_offset_y": 0,
+    },
+    "Executoner": {
+        "speed": settings.ENEMY_SPEED,
+        "delay": settings.ANIMATIONS_ENEMY_DELAYS,
+        
+        # Corrección de posición en x
+        "position_x_correct": 80,
+        
+        # Tamaño base del rectángulo de colisión
+        "base_rect_width": 25,
+        "base_rect_height": 45,
+        
+        # Offset del rectángulo de colisión
+        "enemy_rect_offset_x": 50,
+        "enemy_rect_offset_y": -45,
+        
+        # Rectángulo de ataque
+        "attack_rect_width": 60,
+        
+        # Corrección extra para la posición en Y
+        "extra_custom_offset_y": -60,
+        
+        # Factor de escalado 
+        "scale_factor": 1.2,
+        
+        # Datos base del enemigo
+        "max_health": 80,
+        "attack_range": 60,
+        "detection_range": 150,
+        "attack_damage": 15,
+        
+        # Corrección del piso
+        "floor_correct": 40,
+        
+        # Corrección de la barra de vida
+        "health_bar_offset_x": 40,
         "health_bar_offset_y": 0,
     },
 }

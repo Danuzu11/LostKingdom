@@ -1,0 +1,191 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "levelTest.tmx",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "Todos los archivos (*)",
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/IDJR74LS/Castillo.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/IDJR74LS/DecoracionCastillo.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/IDJR74LS/background_layer_1.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/IDJR74LS/levelCastle[1].tmx": {
+            "scale": 0.16624999999999998,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 640.6015037593984,
+                "y": 800.0000000000001
+            }
+        },
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/O7RD284P/Castillo.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/O7RD284P/DecoracionCastillo.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/O7RD284P/background_layer_1.tsx": {
+            "scaleInDock": 1
+        },
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/O7RD284P/levelCastle[1].tmx": {
+            "scale": 0.16624999999999998,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 640.6015037593984,
+                "y": 800.0000000000001
+            }
+        },
+        "Castillo.tsx": {
+            "scaleInDock": 1
+        },
+        "DecoracionCastillo.tsx": {
+            "scaleInDock": 1
+        },
+        "TX Tileset Ground.tsx": {
+            "scaleInDock": 1
+        },
+        "background_layer_1.tsx": {
+            "scaleInDock": 1
+        },
+        "background_layer_2.tsx": {
+            "scaleInDock": 1
+        },
+        "background_layer_3.tsx": {
+            "scaleInDock": 1
+        },
+        "decoracionesCastilloBoss.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "door.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "floorBoss.tsx": {
+            "scaleInDock": 0.33
+        },
+        "imagenes.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "imagenesCastle.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1.5,
+            "scaleInEditor": 2
+        },
+        "levelCastle.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 5,
+            "viewCenter": {
+                "x": 568.6666666666666,
+                "y": 1380
+            }
+        },
+        "levelTest.tmx": {
+            "expandedObjectLayers": [
+                2
+            ],
+            "scale": 1,
+            "selectedLayer": 16,
+            "viewCenter": {
+                "x": 335.5,
+                "y": 226
+            }
+        },
+        "levelTest.tmx#imagenes": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1
+        },
+        "objetos_villa.tsx": {
+            "scaleInDock": 1
+        },
+        "roomboos.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
+        },
+        "roomboos2.tsx": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 0.5
+        },
+        "roomboss.tmx": {
+            "expandedObjectLayers": [
+                6
+            ],
+            "scale": 1.5,
+            "selectedLayer": 8,
+            "viewCenter": {
+                "x": 178.99999999999994,
+                "y": 150
+            }
+        },
+        "roomboss3.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "roomboss4.tsx": {
+            "scaleInDock": 0.5,
+            "scaleInEditor": 1
+        },
+        "roomboss5.tsx": {
+            "scaleInDock": 0.25,
+            "scaleInEditor": 1
+        },
+        "roombossCandles.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "throneBoss.tsx": {
+            "scaleInDock": 0.5
+        },
+        "torch_big_background.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1
+        },
+        "torch_big_blue_background.tsx": {
+            "scaleInDock": 1
+        },
+        "windowsBoss.tsx": {
+            "scaleInDock": 0.75
+        }
+    },
+    "last.imagePath": "C:/Users/AMD/Desktop/Videojuegos/LostKindom/LostKingdom/assets/textures/Decorations",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "roomboss.tmx",
+        "levelTest.tmx"
+    ],
+    "project": "bossRoom.tiled-project",
+    "recentFiles": [
+        "roomboss.tmx",
+        "levelTest.tmx",
+        "levelCastle.tmx",
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/IDJR74LS/levelCastle[1].tmx",
+        "C:/Users/AMD/AppData/Local/Microsoft/Windows/INetCache/IE/O7RD284P/levelCastle[1].tmx",
+        "roomboss4.tsx",
+        "roomboss3.tsx",
+        "roomboos2.tsx",
+        "roomboos.tsx",
+        "decoracionesCastilloBoss.tsx",
+        "imagenesCastle.tsx",
+        "roomboss5.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 32,
+        "width": 32
+    },
+    "tileset.type": 0
+}

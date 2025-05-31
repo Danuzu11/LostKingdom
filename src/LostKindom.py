@@ -1,4 +1,3 @@
-
 import pygame
 
 from gale.game import Game
@@ -15,14 +14,15 @@ class LostKindom(Game):
             {
                 "video": states.VideoState,
                 "intro": states.IntroState,  
-                "menu": states.MenuState,# Añadir el nuevo estado
+                "menu": states.MenuState,
                 "play": states.PlayState,
+                "outro": states.OutroState,
                 "pause": states.PauseState,
                 "game_over": states.GameOverState,
             }
         )
         self.state_machine.game = self
-        self.state_machine.change("video")       
+        self.state_machine.change("play")       
         # settings.SOUNDS["principal_theme"].play(loops=-1)
         
     def update(self, dt: float) -> None:
