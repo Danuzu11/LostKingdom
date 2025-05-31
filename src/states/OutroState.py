@@ -16,7 +16,7 @@ class OutroState(BaseState):
         
         settings.SOUNDS["boss"].stop()  
         settings.SOUNDS["outro"].play(-1)
-        
+        settings.SOUNDS["outro"].set_volume(1.0)
         # Variables para el texto
         self.font = settings.FONTS["medium"]
         self.font2 = settings.FONTS["small"]

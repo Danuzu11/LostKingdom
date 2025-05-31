@@ -40,7 +40,8 @@ class PlayState(BaseState):
             self.map_image = params.get("map_image")
             self.fade_in = False 
             self.current_level_index = params.get("current_level_index", 0)
-            
+            self.door_trigger = params.get("door_trigger", None)
+
             if self.current_level_index == 2:
                 settings.SOUNDS["principal_theme"].stop()
                 settings.SOUNDS["deepgrowl"].play()  # Reproducir música de jefe si es el tercer nivel
@@ -97,7 +98,7 @@ class PlayState(BaseState):
         self.object_animations = {}
         self.enemies = []
 
-        # Cargar animaciones de objetos (spritesheets cargados desde settings.py)
+        # Cargar animaciones de objetos 
         for spritesheet_name, spritesheet_data in settings.ANIMATED_DECORATIONS.items():
             spritesheet = spritesheet_data["texture"]
             frames = spritesheet_data["frames"]
@@ -222,7 +223,8 @@ class PlayState(BaseState):
                 animated_items=self.animated_items,
                 enemies=self.enemies,
                 current_tile_map=self.current_tile_map,
-                map_image=self.map_image
+                map_image=self.map_image,
+                door_trigger=self.door_trigger
             )
             
         if input_id == "f":

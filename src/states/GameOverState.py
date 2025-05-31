@@ -14,7 +14,6 @@ class GameOverState(BaseState):
         self.fade_out = False 
         settings.SOUNDS["principal_theme"].stop()
         settings.SOUNDS["boss"].stop()
-        settings.SOUNDS["castle"].stop()
         # settings.SOUNDS["principal_theme"].play(loops=-1)
         self.font = settings.FONTS["medium"]
   

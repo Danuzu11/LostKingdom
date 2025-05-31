@@ -14,7 +14,7 @@ class PauseState(BaseState):
         self.params["previous_state"].render(surface)
 
         # Mostrar el mensaje de pausa
-        text = self.font.render("Juego en pausa. Presione 'P' para continuaar", True, (255, 255, 255))
+        text = self.font.render("Juego en pausa. Presione 'P' para continuar", True, (255, 255, 255))
         text_rect = text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2))
         surface.blit(text, text_rect)
 

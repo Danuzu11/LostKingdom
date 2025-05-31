@@ -19,7 +19,7 @@ class MenuState(BaseState):
         settings.SOUNDS["principal_theme"].stop()
         settings.SOUNDS["outro"].stop()
         settings.SOUNDS["principal_theme"].play(loops=-1) 
-        settings.SOUNDS["principal_theme"].set_volume(0.5)
+        settings.SOUNDS["principal_theme"].set_volume(0.8)
         self.font2 = settings.FONTS["verybig"] 
         self.font = settings.FONTS["medium"]
         

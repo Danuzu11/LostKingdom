@@ -140,7 +140,7 @@ Enemies = {
         "max_health": 80,
         "attack_range": 45,
         "detection_range": 200,
-        "attack_damage": 10,
+        "attack_damage": 100,
         
         # Correccion del piso
         "floor_correct": 70,

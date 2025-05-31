@@ -753,8 +753,5 @@
    <point/>
   </object>
   <object id="111" name="door_trigger" x="2116.36" y="202.545" width="31.0909" height="53.4545"/>
-  <object id="113" name="Minotaur" x="277.333" y="255.333">
-   <point/>
-  </object>
  </objectgroup>
 </map>
