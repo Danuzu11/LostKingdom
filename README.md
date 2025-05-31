@@ -218,7 +218,7 @@ pip install pygame pytmx pymovie https://github.com/R3mmurd/Gale/archive/main.zi
 python src/main.py
 ```
 
-## 🎨 Game Development
+## 🎨 Extra System Features
 
 ### Collision System
 - World collision detection
