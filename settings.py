@@ -28,7 +28,7 @@ input_handler.InputHandler.set_keyboard_action(input_handler.KEY_a, "move_left")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_SPACE, "jump")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_x, "x")
 input_handler.InputHandler.set_keyboard_action(input_handler.KEY_p, "pause")
-input_handler.InputHandler.set_keyboard_action(input_handler.KEY_z, "next_level")
+input_handler.InputHandler.set_keyboard_action(input_handler.KEY_f, "f")
 
 pygame.mixer.init()
 pygame.init()
@@ -94,7 +94,9 @@ SOUNDS = {
     "count": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "count.wav"),
     "win": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "win.wav"),
     "deepgrowl": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "deepgrowl.mp3"),  
+    "boss": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "boss.mp3"),  
     "player_death": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "player_death.mp3"),  
+    "outro": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "outro.mp3"),  
     
     # Sonidos de ataques 
     "slash1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "slash1.wav"),
@@ -176,6 +178,7 @@ COMPLEX_TEXTURES = {
     
     "Minotaur":{ 
         "Minotaur": pygame.image.load(BASE_DIR / "assets" / "textures" / "minotaur" / "minotaur.png"),
+        # "Minotaur": pygame.image.load(BASE_DIR / "assets" / "textures" / "minotaur" / "image.png"),
     },
     
     "Golem":{

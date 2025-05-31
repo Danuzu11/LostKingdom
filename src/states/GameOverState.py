@@ -13,10 +13,11 @@ class GameOverState(BaseState):
         self.fade_in = True  
         self.fade_out = False 
         settings.SOUNDS["principal_theme"].stop()
-        
+        settings.SOUNDS["boss"].stop()
+        settings.SOUNDS["castle"].stop()
         # settings.SOUNDS["principal_theme"].play(loops=-1)
-        self.font = pygame.font.Font(None, 48)  # Fuente para el texto
-    
+        self.font = settings.FONTS["medium"]
+  
     def update(self, dt: float) -> None:
         """
         Actualiza la lógica del estado.
@@ -39,7 +40,7 @@ class GameOverState(BaseState):
         gameOverText = self.font.render("Game Over", True, (255, 0, 0))
         gameOverText_rect = gameOverText.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2 - 50))
         surface.blit(gameOverText, gameOverText_rect)
-        text = self.font.render("Press ENTER to Start", True, (255, 255, 255))
+        text = self.font.render("Presiona ENTER para volver al menu", True, (255, 255, 255))
         text_rect = text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 1.5))
         surface.blit(text, text_rect)
         

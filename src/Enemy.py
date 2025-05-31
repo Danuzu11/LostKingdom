@@ -272,13 +272,15 @@ class Enemy:
             
             # run moveset
             initial_sprite = 16
-            sprite_moveset_size = 27
+            sprite_moveset_size = 11
+            # initial_sprite = 20
+            # sprite_moveset_size = 27
             enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
             self.animations["run"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
             
             # attack moveset
             initial_sprite = 33
-            sprite_moveset_size = 9
+            sprite_moveset_size = 14
             enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
             self.animations["attack"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
 
@@ -372,9 +374,9 @@ class Enemy:
         """
         # Crear un rectángulo de detección adelante del enemigo en la dirección de movimiento
         ground_check = pygame.Rect(
-            self.rect.x + (10 * self.direction) ,  # Posicion adelante en la dirección de movimiento
+            self.rect.x + ((self.rect.width + 10) * self.direction)  ,  # Posicion adelante en la dirección de movimiento
             self.rect.bottom ,
-            self.rect.width,
+            25,
             25  # Altura pequeña para la deteccion
         )
         
@@ -390,6 +392,7 @@ class Enemy:
         if self.is_dead:      
             if not self.start_death:
                 settings.DEATH_SOUNDS[self.name].play()
+                settings.DEATH_SOUNDS[self.name].set_volume(1.0)
                 self.start_death = True
                  
             if not self.death_animation_completed:
@@ -460,7 +463,8 @@ class Enemy:
             self.waiting = False
         
         # Calculamos la distancia horizontal al jugador
-        distance_to_player = abs(self.x - player.x)
+        # distance_to_player = abs(self.x - player.x)
+        distance_to_player = abs(self.rect.centerx - player.king_rect.centerx)
         # Verificamos si el jugador está dentro del rango de visión horizontal Y a una altura aceptable
         in_range_player = distance_to_player <= self.detection_range
         has_vision = self.has_line_of_sight(player, solid_objects)
@@ -470,10 +474,11 @@ class Enemy:
         self.horizontal_velocity = 0
         # self.attacking se determinará aquí y se usará para update_rect más adelante
 
-        # Lógica de Orientación PRIORITARIA si el jugador está detectado y visible
+        # Logica de Orientación PRIORITARIA si el jugador está detectado y visible
         if has_vision and in_range_player : # Un poco más que detection_range para voltear
             planned_direction = 1 if player.x > self.x else -1  
-                          
+
+                              
         # Estado por defecto
         self.horizontal_velocity = 0
             
@@ -581,26 +586,32 @@ class Enemy:
             
         offset = camera_offset if camera_offset else (0, 0)
         # y_render = offset[1] + self.enemy_rect_offset_y * 3 # Aplica el offset vertical
-        screen.blit(current_surface, (self.x - offset[0], self.y - offset[1] - self.floor_correct))
+        if self.name == "Minotaur":
+            # Ajustar la posición del Minotauro para que se vea bien
+            screen.blit(current_surface, (self.x - offset[0] - 160, self.y - offset[1] - self.floor_correct))
+        else:
+            screen.blit(current_surface, (self.x - offset[0], self.y - offset[1] - self.floor_correct))
         
         # Dibujar el rectangulo de colision 
-        rect_to_draw = pygame.Rect(
-            self.rect.x - offset[0],
-            self.rect.y - offset[1],
-            self.rect.width,
-            self.rect.height,
-        )
-        pygame.draw.rect(screen, (255, 0, 0), rect_to_draw, 2)
+        # rect_to_draw = pygame.Rect(
+        #     self.rect.x - offset[0],
+        #     self.rect.y - offset[1],
+        #     self.rect.width,
+        #     self.rect.height,
+        # )
+        # pygame.draw.rect(screen, (255, 0, 0), rect_to_draw, 2)
         
         # Dibujar el rectángulo de deteccion de suelo
-        ground_check = pygame.Rect(
-            self.rect.x + ((self.rect.width + 10) * self.direction)  - offset[0],
-            self.rect.bottom - offset[1],
-            25,
-            25
-        )
-        pygame.draw.rect(screen, (0, 255, 0), ground_check, 2)
+        # ground_check = pygame.Rect(
+        #     self.rect.x + ((self.rect.width + 10) * self.direction)  - offset[0],
+        #     self.rect.bottom - offset[1],
+        #     25,
+        #     25
+        # )
+        # pygame.draw.rect(screen, (0, 255, 0), ground_check, 2)
         
+
+
         # if player is not None:
         #     enemy_pos = (self.rect.centerx - camera_offset[0], self.rect.centery - camera_offset[1])
         #     player_pos = (player.king_rect.centerx - camera_offset[0], player.king_rect.centery - camera_offset[1])

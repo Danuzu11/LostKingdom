@@ -1,19 +1,20 @@
 import pygame
 from gale.state import BaseState
 from gale.input_handler import InputData
+import settings
 
 class PauseState(BaseState):
     def enter(self, **params: dict):
         self.params = params
         self.player = params.get("player")
-        self.font = pygame.font.Font(None, 48)  # Fuente para el texto
+        self.font = settings.FONTS["medium"]  # Fuente para el texto
 
     def render(self, surface):
         # Renderizar el estado anterior
         self.params["previous_state"].render(surface)
 
         # Mostrar el mensaje de pausa
-        text = self.font.render("Game Paused. Press 'P' to Resume", True, (255, 255, 255))
+        text = self.font.render("Juego en pausa. Presione 'P' para continuaar", True, (255, 255, 255))
         text_rect = text.get_rect(center=(surface.get_width() // 2, surface.get_height() // 2))
         surface.blit(text, text_rect)
 

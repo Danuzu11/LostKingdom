@@ -18,7 +18,7 @@ class Player:
         self.can_initiate_new_action = True # Para controlar cuándo se pueden iniciar nuevos saltos/ataques
         
         # Sistema de vida
-        self.max_health = 10000
+        self.max_health = 500
         self.current_health = self.max_health
         self.is_dead = False
         self.attack_damage = 100  # Daño que hace el jugador
@@ -284,10 +284,7 @@ class Player:
         # 3. Quieto (venia de correr)   
         elif self.current_state == "run" and self.horizontal_velocity == 0 and self.on_ground: 
             self.current_state = "idle"       
-        
-        # if self.vertical_velocity != 0:    
-        #     self.current_state = "jump"   
-                      
+                            
         # Current delay es para saber cuanto tiempo tiene que pasar para que se cambie el frame de la animacion
         if self.current_state == "fall":
             current_delay = settings.ANIMATIONS_DELAYS["jump"]
@@ -403,19 +400,18 @@ class Player:
         self.render_health_bar(x,y_render,screen)
         
    
-       # Dibujar el rectángulo de colision
-        # Ajusta la posición del rectángulo según el offset de la camara
-        rect_draw_x = self.king_rect.x
-        rect_draw_y = self.king_rect.y
-        if camera_offset:
-            rect_draw_x = self.king_rect.x - self.x + x
-            rect_draw_y = self.king_rect.y - self.y + y
-        pygame.draw.rect(
-            screen,
-            (255, 0, 0),  # Color rojo
-            pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
-            2,  # Grosor de la línea
-        )
+       # Dibujar el rectangulo de colision
+        # rect_draw_x = self.king_rect.x
+        # rect_draw_y = self.king_rect.y
+        # if camera_offset:
+        #     rect_draw_x = self.king_rect.x - self.x + x
+        #     rect_draw_y = self.king_rect.y - self.y + y
+        # pygame.draw.rect(
+        #     screen,
+        #     (255, 0, 0),  # Color rojo
+        #     pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
+        #     2,  # Grosor de la línea
+        # )
     
     # METODO AUXILIARES
     # Actuliza el rectangulo de colision de la camara, es decir el rectangulo que se usa para mover la camara

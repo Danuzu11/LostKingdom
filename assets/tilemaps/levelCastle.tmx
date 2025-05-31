@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="87">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="89">
  <tileset firstgid="1" source="DecoracionCastillo.tsx"/>
  <tileset firstgid="42" source="Castillo.tsx"/>
  <tileset firstgid="198" source="background_layer_1.tsx"/>
@@ -277,14 +277,10 @@
   <object id="7" name="obstacle" x="3.34067" y="1542.54" width="1277.34" height="26.6648" rotation="0.0228391"/>
   <object id="9" name="obstacle" x="1248.73" y="24.091" width="12.2424" height="1518.49"/>
   <object id="10" name="obstacle" x="1.54547" y="1.757" width="12.2424" height="1541.49"/>
-  <object id="11" name="obstacle" x="98" y="1377" width="539.5" height="11"/>
+  <object id="11" name="obstacle" x="98" y="1382" width="535.5" height="11"/>
   <object id="12" name="obstacle" x="1121.83" y="1348.67" width="95" height="11"/>
   <object id="14" name="obstacle" x="928.833" y="1287.83" width="154.833" height="8.5"/>
   <object id="15" name="obstacle" x="898.5" y="1412.5" width="349" height="5.5"/>
-  <object id="16" name="obstacle" x="640" y="1433.67" width="65" height="4"/>
-  <object id="17" name="obstacle" x="803.833" y="1466.33" width="90.5" height="5"/>
-  <object id="19" name="obstacle" x="634.833" y="1378.67" width="5.66667" height="54.6667"/>
-  <object id="20" name="obstacle" x="896.5" y="1416" width="5.66667" height="54.6667"/>
   <object id="21" name="obstacle" x="417.5" y="1129.16" width="124.333" height="11"/>
   <object id="24" name="obstacle" x="675.583" y="1353.09" width="120.167" height="8.5"/>
   <object id="25" name="obstacle" x="580.5" y="1189.17" width="379" height="11"/>
@@ -323,7 +319,7 @@
   <object id="63" name="castleTorch" x="149.333" y="1474.67">
    <point/>
   </object>
-  <object id="64" name="NightBorne" x="364" y="685.333">
+  <object id="64" name="NightBorne" x="364" y="706.333">
    <point/>
   </object>
   <object id="65" name="castleTorch" x="318.667" y="81.3333">
@@ -344,13 +340,13 @@
   <object id="70" name="castleTorch" x="895.333" y="634.667">
    <point/>
   </object>
-  <object id="71" name="NightBorne" x="180" y="1053.33">
+  <object id="71" name="NightBorne" x="180" y="1065.33">
    <point/>
   </object>
-  <object id="72" name="NightBorne" x="576.667" y="1369.67">
+  <object id="72" name="Executoner" x="576.667" y="1378.67">
    <point/>
   </object>
-  <object id="73" name="NightBorne" x="1078.67" y="1533.33">
+  <object id="73" name="Executoner" x="1078.67" y="1542.33">
    <point/>
   </object>
   <object id="74" name="castleTorch" x="383.333" y="80">
@@ -383,10 +379,16 @@
   <object id="83" name="castleTorch" x="1074.5" y="1490">
    <point/>
   </object>
-  <object id="84" name="key" x="937.066" y="1499.66">
+  <object id="84" name="key" x="286.566" y="1484.16">
    <point/>
   </object>
   <object id="85" x="1173" y="1477.33" width="0.333333" height="0.666667"/>
   <object id="86" name="door_trigger" x="1153.33" y="1447" width="35" height="57.6667"/>
+  <object id="87" name="NightBorne" x="557.333" y="135.333">
+   <point/>
+  </object>
+  <object id="88" name="NightBorne" x="878" y="328">
+   <point/>
+  </object>
  </objectgroup>
 </map>

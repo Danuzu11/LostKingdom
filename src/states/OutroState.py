@@ -13,7 +13,10 @@ class OutroState(BaseState):
         self.fade_speed = 3
         self.fade_in = True
         self.fade_out = False
-
+        
+        settings.SOUNDS["boss"].stop()  
+        settings.SOUNDS["outro"].play(-1)
+        
         # Variables para el texto
         self.font = settings.FONTS["medium"]
         self.font2 = settings.FONTS["small"]

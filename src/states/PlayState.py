@@ -29,7 +29,7 @@ class PlayState(BaseState):
          # Lista de niveles disponibles
         self.available_levels = list(settings.LEVELS.keys())
         self.current_level_index = 0  
-        
+
         if params:  # Si se pasan parametros, restaurar el estado
             self.player = params.get("player")
             self.camera = params.get("camera")
@@ -40,7 +40,12 @@ class PlayState(BaseState):
             self.map_image = params.get("map_image")
             self.fade_in = False 
             self.current_level_index = params.get("current_level_index", 0)
-
+            
+            if self.current_level_index == 2:
+                settings.SOUNDS["principal_theme"].stop()
+                settings.SOUNDS["deepgrowl"].play()  # Reproducir música de jefe si es el tercer nivel
+                settings.SOUNDS["boss"].play(-1)  # Reproducir música de jefe si es el tercer nivel
+                
             level_name = params.get("level_name")
             if level_name:
                 self.load_level(level_name)
@@ -186,67 +191,79 @@ class PlayState(BaseState):
         
         # Inicializar el jugador
         # Solo crear un nuevo jugador si no existe uno
-        # if not hasattr(self, 'player'):
-        #     self.player = Player(self.player_x, self.player_y)
-        # else:
-        #     # Actualizar la posición del jugador existente
-        #     self.player.x = self.player_x
-        #     self.player.y = self.player_y
+        if not hasattr(self, 'player'):
+            self.player = Player(self.player_x, self.player_y)
+        else:
+            # Actualizar la posición del jugador existente
+            self.player.x = self.player_x
+            self.player.y = self.player_y
         # Inicializar el jugador
-        self.player = Player(self.player_x, self.player_y)   
+        # self.player = Player(self.player_x, self.player_y)   
     
-    # Ahora sí podemos establecer has_key
+  
         self.player.has_key = False
        
 
     def on_input(self, input_id: str, input_data: InputData) -> None:  
         new_state = "idle"     
 
-        if input_id == "next_level" and input_data.pressed:
-            # Avanzar al siguiente nivel
-            
-         if self.player.has_key and self.door_trigger and self.player.king_rect.colliderect(self.door_trigger):
-                # Avanzar al siguiente nivel
-                self.current_level_index = (self.current_level_index + 1) % len(self.available_levels)
-                next_level = self.available_levels[self.current_level_index]
-                
-                # Guardar el estado actual para pasarlo al nuevo nivel
-                current_state = {
-                    "player": self.player,
-                    "camera": self.camera,
-                    "solid_objects": self.solid_objects,
-                    "animated_items": self.animated_items,
-                    "enemies": self.enemies,
-                    "current_tile_map": self.current_tile_map,
-                    "map_image": self.map_image,
-                    "current_level_index": self.current_level_index,
-                     "level_name": next_level 
-                    
-                }
-                
-                # Cargar el nuevo nivel
-                self.load_level(next_level)
-                print(next_level)
 
-                # Cambiar al nuevo nivel manteniendo el estado
-                self.state_machine.change(
-                    "play",
-                    previous_state=self,
-                    **current_state  # Pasamos todos los datos del estado actual
-                )
-           
-        else:
-            if not self.player.has_key:
-                print("¡Necesitas la llave para avanzar al siguiente nivel!")
-            elif not self.door_trigger or not self.player.king_rect.colliderect(self.door_trigger):
-                print("¡Debes estar frente a la puerta!")
+
+        # if input_id == "enter" and input_data.pressed:
+        #     self.state_machine.change("menu")  # Cambiar al estado de menú
+ 
+        if input_id == "pause" and input_data.pressed:
+            self.state_machine.change(
+                "pause",
+                previous_state=self,
+                player=self.player,
+                camera=self.camera,
+                solid_objects=self.solid_objects,
+                animated_items=self.animated_items,
+                enemies=self.enemies,
                 current_tile_map=self.current_tile_map,
                 map_image=self.map_image
+            )
             
+        if input_id == "f":
+            # Avanzar al siguiente nivel
+                
+            if self.player.has_key and self.door_trigger and self.player.king_rect.colliderect(self.door_trigger):
+                    # Avanzar al siguiente nivel
+                    self.current_level_index = (self.current_level_index + 1) % len(self.available_levels)
+                    next_level = self.available_levels[self.current_level_index]
+                    
+                    # Guardar el estado actual para pasarlo al nuevo nivel
+                    current_state = {
+                        "player": self.player,
+                        "camera": self.camera,
+                        "solid_objects": self.solid_objects,
+                        "animated_items": self.animated_items,
+                        "enemies": self.enemies,
+                        "current_tile_map": self.current_tile_map,
+                        "map_image": self.map_image,
+                        "current_level_index": self.current_level_index,
+                        "level_name": next_level 
+                        
+                    }
+                    
+                    # Cargar el nuevo nivel
+                    self.load_level(next_level)
+                    print(next_level)
 
-        if input_id == "enter" and input_data.pressed:
-            self.state_machine.change("menu")  # Cambiar al estado de menú
-    
+                    # Cambiar al nuevo nivel manteniendo el estado
+                    self.state_machine.change(
+                        "play",
+                        previous_state=self,
+                        **current_state  # Pasamos todos los datos del estado actual
+                    )
+            
+            else:
+                if not self.player.has_key:
+                    print("¡Necesitas la llave para avanzar al siguiente nivel!")
+                elif not self.door_trigger or not self.player.king_rect.colliderect(self.door_trigger):
+                    print("¡Debes estar frente a la puerta!")
+                            
         if input_id == "move_left":
             if input_data.pressed:
                 self.player.horizontal_velocity = -settings.PLAYER_SPEED
@@ -291,7 +308,8 @@ class PlayState(BaseState):
                 self.player.current_frame = 0
                 self.player.attacking = False
                         
-        elif input_id == "x" and not self.player.jumping and self.player.horizontal_velocity == 0 and not self.player.current_state == "jump":
+        elif input_id == "x" and not self.player.jumping and  self.player.horizontal_velocity == 0 and self.player.vertical_velocity == 0  and not self.player.current_state == "jump":
+            print(self.player.horizontal_velocity)
             random_attack = 1
             # Validamos si no estamos atacando ya , si el player no se encuentra atacando entonces comienza el ataque en combo
             if not self.player.attacking:
@@ -469,8 +487,6 @@ class PlayState(BaseState):
         # for animated_item in self.animated_items:
         #     animated_item.draw(surface, (self.camera.offset_x, self.camera.offset_y))
             
-
-        
         # # Dibujar enemigos
         # for enemy in self.enemies:
         #     enemy.draw(surface, (self.camera.offset_x , self.camera.offset_y))
@@ -508,7 +524,7 @@ class PlayState(BaseState):
             
             # Opcional: Mostrar texto de interacción
             font = pygame.font.Font(None, 24)
-            text = font.render("Presiona Z para abrir", True, (255, 255, 255))
+            text = font.render("Presiona F para abrir", True, (255, 255, 255))
             text_rect = text.get_rect(center=(indicator_x, indicator_y - 15))
             surface.blit(text, text_rect)
 
@@ -534,14 +550,14 @@ class PlayState(BaseState):
             
             
         #Dibujar los objetos sólidos
-        for solid in self.solid_objects:
-            rect_with_offset = pygame.Rect(
-                solid.x - self.camera.offset_x,
-                solid.y - self.camera.offset_y,
-                solid.width,
-                solid.height
-            )
-            pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
+        # for solid in self.solid_objects:
+        #     rect_with_offset = pygame.Rect(
+        #         solid.x - self.camera.offset_x,
+        #         solid.y - self.camera.offset_y,
+        #         solid.width,
+        #         solid.height
+        #     )
+        #     pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
         
         # Aplicar el fade in
         if self.fade_in or self.fade_out:
