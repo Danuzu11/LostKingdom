@@ -62,7 +62,7 @@ Enemies = {
             "scale_factor": 3,
             
             # Datos base del enemigo
-            "max_health": 200,
+            "max_health": 100,
             "attack_range": 45,
             "detection_range": 200,
             "attack_damage": 10,
@@ -82,7 +82,7 @@ Enemies = {
         "position_x_correct": 50,
         
         # Tama�o base del rect�ngulo de colisi�n
-        "base_rect_width": 80,
+        "base_rect_width": 50,
         "base_rect_height": 55,
         
         # Offset del rect�ngulo de colisi�n
@@ -100,7 +100,7 @@ Enemies = {
         
         # Datos base del enemigo
         "max_health": 150,
-        "attack_range": 60,
+        "attack_range": 45,
         "detection_range": 300,
         "attack_damage": 30,
         
@@ -137,7 +137,7 @@ Enemies = {
         "scale_factor": 1.5,
         
         # Datos base del enemigo
-        "max_health": 150,
+        "max_health": 80,
         "attack_range": 45,
         "detection_range": 200,
         "attack_damage": 10,

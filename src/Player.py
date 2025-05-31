@@ -21,7 +21,7 @@ class Player:
         self.max_health = 500
         self.current_health = self.max_health
         self.is_dead = False
-        self.attack_damage = 100  # Daño que hace el jugador
+        self.attack_damage = 35  # Daño que hace el jugador
         self.has_key = False
         self.has_door_key = False
 
