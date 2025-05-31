@@ -82,6 +82,7 @@ ANIMATIONS_DELAYS = {
 LEVELS = {
     # "intro1": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "introLevel.tmx", pixelalpha=True),
     "intro": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "levelTest.tmx", pixelalpha=True),
+    "level1": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "levelCastle.tmx", pixelalpha=True),
     "roomboss": pytmx.load_pygame(BASE_DIR / "assets" / "tilemaps" / "roomboss.tmx", pixelalpha=True),
 }
 
@@ -113,7 +114,7 @@ TEXTURES = {
     "fireplace": pygame.image.load(BASE_DIR / "assets" / "textures" / "fireplace.png"),
     "torch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch.png"),
     "castleTorch": pygame.image.load(BASE_DIR / "assets" / "textures" / "torch_big" / "castleTorch.png"),
-    
+    "key": pygame.image.load(BASE_DIR / "assets" / "textures" / "KeyIcons.png"),
     
     #"menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "menu.png"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
     "menu": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "slayer.jpg"),(VIRTUAL_WIDTH,VIRTUAL_HEIGHT)),
@@ -144,6 +145,7 @@ COMPLEX_TEXTURES = {
         "Run": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" /"Golem_Run.png"),
         "Attack": pygame.image.load(BASE_DIR / "assets" / "textures" / "Golem" / "Golem_AttackC.png"),
     },
+
   
 }
 
@@ -171,7 +173,7 @@ COMPLEX_FRAMES = {
         "Run":  frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Run"], 64 , 64),        
         "Attack": frames.generate_frames(COMPLEX_TEXTURES["Golem"]["Attack"], 64 , 64),
     },
-    
+
 }
 
 # Generar frames del sprite
@@ -186,6 +188,7 @@ FRAMES = {
     "fireplace": frames.generate_frames(TEXTURES["fireplace"], 64, 64),
     "torch": frames.generate_frames(TEXTURES["torch"], 64, 64),  
     "castleTorch": frames.generate_frames(TEXTURES["castleTorch"], 12, 42),
+    "key": frames.generate_frames(TEXTURES["key"], 31, 31),
     
 }
 
@@ -230,7 +233,14 @@ ANIMATED_DECORATIONS = {
         "frames" : FRAMES["castleTorch"] ,
         "correctionX" : 5,
         "correctionY" : 40,  
-    }
+    },
+    "key" : {
+        "texture" : TEXTURES["key"] ,
+        "frames" : FRAMES["key"] ,
+        "correctionX" : 0,
+        "correctionY" : 0,
+    },
+
     
 }
 

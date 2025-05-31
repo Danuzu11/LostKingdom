@@ -17,6 +17,8 @@ class Player:
         self.current_health = self.max_health
         self.is_dead = False
         self.attack_damage = 20  # Daño que hace el jugador
+        self.has_key = False
+        self.has_door_key = False
 
         self.current_surface = None
         # Para el da;o
@@ -143,6 +145,7 @@ class Player:
                 # Colision desde arriba (cayendo)
                 if min_dist == dist_top and self.vertical_velocity > 0:
                     print("colision suelo")
+                    print(self.current_health)
                     self.y = solid.top - self.king_rect.height - self.rect_offset_y
                     self.vertical_velocity = 0
                     self.jumping = False

@@ -2,7 +2,7 @@ import pygame
 import settings 
 
 class AnimatedItem:
-    def __init__(self, x, y, frames, animation_delay=1000):
+    def __init__(self, x, y, frames, animation_delay=1000, name=None):
        
         # :param frames: Lista de superficies (frames) para la animación.
         # :param animation_delay: Tiempo en milisegundos entre cada frame.
@@ -13,6 +13,7 @@ class AnimatedItem:
         self.animation_delay = animation_delay
         self.current_frame = 0
         self.animation_timer = 0
+        self.name = name
 
     def update(self, delta_time):
         self.animation_timer += delta_time

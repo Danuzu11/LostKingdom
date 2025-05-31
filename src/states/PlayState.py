@@ -17,7 +17,8 @@ class PlayState(BaseState):
         self.fade_surface = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
         self.fade_surface.fill((0, 0, 0))
         self.fade_speed = 3
-
+       
+        self.door_trigger = None
          # Lista de niveles disponibles
         self.available_levels = list(settings.LEVELS.keys())
         self.current_level_index = 0  
@@ -32,6 +33,10 @@ class PlayState(BaseState):
             self.map_image = params.get("map_image")
             self.fade_in = False 
             self.current_level_index = params.get("current_level_index", 0)
+
+            level_name = params.get("level_name")
+            if level_name:
+                self.load_level(level_name)
 
         else:  # Si no se pasan parametros, inicializar desde cero
             self.transition = True
@@ -149,6 +154,9 @@ class PlayState(BaseState):
         self.animated_items = []
         self.enemies = []
         self.mask_objects = []
+
+      
+     
         
         # Cargar el nuevo nivel
         self.current_tile_map = TileMap(level_name)
@@ -196,19 +204,31 @@ class PlayState(BaseState):
                 self.player_x = objects.x * scale_factor
                 self.player_y = objects.y * scale_factor
             elif objects.name == "obstacle":
+                print(objects.id)
                 solid_rect = pygame.Rect(
                     objects.x * scale_factor,
                     objects.y * scale_factor,
                     objects.width * scale_factor,
                     objects.height * scale_factor,
+                    
                 )
                 self.solid_objects.append(solid_rect)
-            elif objects.name in ["fireplace", "torch","castleTorch"]:
+
+            elif objects.name == "door_trigger":
+                self.door_trigger = pygame.Rect(
+                    objects.x * scale_factor,
+                    objects.y * scale_factor,
+                    objects.width * scale_factor,
+                    objects.height * scale_factor,
+                )
+           
+            elif objects.name in ["fireplace", "torch","castleTorch","key"]:
                 animated_item = AnimatedItem(
                     objects.x * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionX"],
                     objects.y * scale_factor - settings.ANIMATED_DECORATIONS[objects.name]["correctionY"],
                     self.object_animations[objects.name],
                     animation_delay=150,
+                    name = objects.name
                 )
                 self.animated_items.append(animated_item)
             
@@ -219,6 +239,7 @@ class PlayState(BaseState):
                     "NightBorne",
                 )
                 self.enemies.append(enemy)
+                
             elif objects.name == "Golem":
                 enemy = Enemy(
                     objects.x * scale_factor,
@@ -247,55 +268,60 @@ class PlayState(BaseState):
         self.fade_in = True
         
         # Inicializar el jugador
-        self.player = Player(self.player_x, self.player_y)        
+        # Solo crear un nuevo jugador si no existe uno
+        if not hasattr(self, 'player'):
+            self.player = Player(self.player_x, self.player_y)
+        else:
+            # Actualizar la posición del jugador existente
+            self.player.x = self.player_x
+            self.player.y = self.player_y
+
+    
+    # Ahora sí podemos establecer has_key
+        self.player.has_key = False
+       
 
     def on_input(self, input_id: str, input_data: InputData) -> None:  
         new_state = "idle"     
 
         if input_id == "next_level" and input_data.pressed:
             # Avanzar al siguiente nivel
-            self.current_level_index = (self.current_level_index + 1) % len(self.available_levels)
-            next_level = self.available_levels[self.current_level_index]
             
-            # Guardar el estado actual para pasarlo al nuevo nivel
-            current_state = {
-                "player": self.player,
-                "camera": self.camera,
-                "solid_objects": self.solid_objects,
-                "animated_items": self.animated_items,
-                "enemies": self.enemies,
-                "current_tile_map": self.current_tile_map,
-                "map_image": self.map_image,
-                "current_level_index": self.current_level_index
-            }
-            
-            # self.state_machine.change(
-            #     "play",
-            #     previous_state=self,
-            #     player=self.player,
-            #     camera=self.camera,
-            #     solid_objects=self.solid_objects,
-            #     animated_items=self.animated_items,
-            #     enemies=self.enemies,
-            #     current_tile_map=self.current_tile_map,
-            #     map_image=self.map_image
-            # )
-            
-            # Cargar el nuevo nivel
-            self.load_level(next_level)
-            
-        if input_id == "pause" and input_data.pressed:
-            self.state_machine.change(
-                "pause",
-                previous_state=self,
-                player=self.player,
-                camera=self.camera,
-                solid_objects=self.solid_objects,
-                animated_items=self.animated_items,
-                enemies=self.enemies,
-                current_tile_map=self.current_tile_map,
-                map_image=self.map_image
-            )
+         if self.player.has_key and self.door_trigger and self.player.king_rect.colliderect(self.door_trigger):
+                # Avanzar al siguiente nivel
+                self.current_level_index = (self.current_level_index + 1) % len(self.available_levels)
+                next_level = self.available_levels[self.current_level_index]
+                
+                # Guardar el estado actual para pasarlo al nuevo nivel
+                current_state = {
+                    "player": self.player,
+                    "camera": self.camera,
+                    "solid_objects": self.solid_objects,
+                    "animated_items": self.animated_items,
+                    "enemies": self.enemies,
+                    "current_tile_map": self.current_tile_map,
+                    "map_image": self.map_image,
+                    "current_level_index": self.current_level_index,
+                     "level_name": next_level 
+                    
+                }
+                
+                # Cargar el nuevo nivel
+                self.load_level(next_level)
+                print(next_level)
+
+                # Cambiar al nuevo nivel manteniendo el estado
+                self.state_machine.change(
+                    "play",
+                    previous_state=self,
+                    **current_state  # Pasamos todos los datos del estado actual
+                )
+           
+        else:
+            if not self.player.has_key:
+                print("¡Necesitas la llave para avanzar al siguiente nivel!")
+            elif not self.door_trigger or not self.player.king_rect.colliderect(self.door_trigger):
+                print("¡Debes estar frente a la puerta!")
 
         if input_id == "enter" and input_data.pressed:
             self.state_machine.change("menu")  # Cambiar al estado de menú
@@ -414,7 +440,9 @@ class PlayState(BaseState):
         # 2. Crear/Reconstruir el Quadtree
         # Ajusta max_objects y max_depth según sea necesario.
         self.collision_quadtree = QuadTree(quadtree_bounds, max_objects=7, max_depth=6)
-        
+
+
+            
         # 3. Insertar objetos solidos en el Quadtree
         for solid_rect in self.solid_objects:
             # Solo insertar si el objeto está dentro o cerca del area del Quadtree
@@ -429,7 +457,26 @@ class PlayState(BaseState):
         
         # Actualizar jugador, pasando solo los sólidos cercanos
         self.player.update(delta_time, solid_objects_for_player) # Modificado: solo sólidos cercanos
-         
+
+          # Verificar colisión con la llave
+        for animated_item in self.animated_items[:]:  # Usamos una copia de la lista para poder modificarla
+            if animated_item.name == "key":
+                # Crear un rectángulo para la llave
+                key_rect = pygame.Rect(
+                    animated_item.x,
+                    animated_item.y,
+                    animated_item.frames[0].get_width(),
+                    animated_item.frames[0].get_height()
+                )
+                
+                # Verificar colisión con el jugador
+                if self.player.king_rect.colliderect(key_rect):
+                    # Aquí puedes agregar la lógica cuando el jugador recoge la llave
+                    print("¡Has recogido la llave!")
+                    self.animated_items.remove(animated_item)  # Eliminar la llave
+                    self.player.has_key = True
+  
+
         # Actualizar enemigos
         for enemy in self.enemies:
             # Obtener solidos cercanos para cada enemigo
@@ -500,13 +547,31 @@ class PlayState(BaseState):
             # else:
                 # Podrías tener un manejo para items sin frames si fuera posible,
                 # pero según tu init, siempre deberían tener frames.
-
+         # Mostrar indicador de interacción solo si tiene la llave
+        if self.player.has_key and self.door_trigger and self.player.king_rect.colliderect(self.door_trigger):
+            # Calcular posición del indicador (por ejemplo, arriba del jugador)
+            indicator_x = self.player.king_rect.centerx - self.camera.offset_x
+            indicator_y = self.player.king_rect.top - 30 - self.camera.offset_y
+            
+            # Dibujar el indicador (por ejemplo, un triángulo)
+            pygame.draw.polygon(surface, (255, 255, 0), [
+                (indicator_x, indicator_y),
+                (indicator_x - 10, indicator_y + 10),
+                (indicator_x + 10, indicator_y + 10)
+            ])
+            
+            # Opcional: Mostrar texto de interacción
+            font = pygame.font.Font(None, 24)
+            text = font.render("Presiona Z para abrir", True, (255, 255, 255))
+            text_rect = text.get_rect(center=(indicator_x, indicator_y - 15))
+            surface.blit(text, text_rect)
 
         # Dibujar enemigos (solo los visibles)
         for enemy in self.enemies:
             # Asumiendo que Enemy tiene un método get_world_rect() o atributos x,y,width,height
             # enemy_world_rect = enemy.get_world_rect() # Idealmente
             # O si tiene .rect que está en coordenadas del mundo:
+            
             if hasattr(enemy, 'rect') and camera_view_rect.colliderect(enemy.rect):
                 enemy.draw(surface, (self.camera.offset_x, self.camera.offset_y),self.player,self.solid_objects)
             elif hasattr(enemy, 'x') and hasattr(enemy, 'current_surface'): # Si tiene x,y y una superficie actual

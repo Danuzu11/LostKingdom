@@ -14,7 +14,7 @@ class VideoState(BaseState):
         self.video = VideoFileClip(self.video_path)
 
         # Convertir el video en frames para reproducirlo en pygame
-        self.video_frames = self.video.iter_frames(fps=60, dtype="uint8")
+        self.video_frames = self.video.iter_frames(dtype="uint8")
         self.video_surface = None
         self.video_finished = False
         
