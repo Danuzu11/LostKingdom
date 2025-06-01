@@ -1,4 +1,4 @@
-# Memories of the Lost Kingdom
+# Lost Kingdom
 
 A 2D action-adventure game developed with Python and Pygame, featuring dynamic combat, enemy AI, and a rich tile-based world.
 
