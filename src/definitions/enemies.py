@@ -29,7 +29,7 @@ Enemies = {
             "scale_factor": 1.6,
             "max_health": 100,
             "attack_range": 45,
-            "detection_range": 100,
+            "detection_range": 200,
             "attack_damage": 13,
             
             # Corecccion de la barra de vida del enemigo
@@ -99,9 +99,9 @@ Enemies = {
         "scale_factor": 1.8,
         
         # Datos base del enemigo
-        "max_health": 150,
+        "max_health": 300,
         "attack_range": 45,
-        "detection_range": 300,
+        "detection_range": 400,
         "attack_damage": 30,
         
         # Correccion del piso
@@ -176,7 +176,7 @@ Enemies = {
         # Datos base del enemigo
         "max_health": 80,
         "attack_range": 45,
-        "detection_range": 150,
+        "detection_range": 200,
         "attack_damage": 15,
         
         # Correcci�n del piso

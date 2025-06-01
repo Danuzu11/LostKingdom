@@ -21,7 +21,7 @@ class Player:
         self.max_health = 500
         self.current_health = self.max_health
         self.is_dead = False
-        self.attack_damage = 35  # Daño que hace el jugador
+        self.attack_damage = 40  # Daño que hace el jugador
         self.has_key = False
         self.has_door_key = False
 
@@ -96,7 +96,7 @@ class Player:
         # Y cuando ataca el rectangulo de colision crecera
         self.base_rect_width = 20
         self.base_rect_height = 55
-        self.attack_rect_width = 55
+        self.attack_rect_width = 60
 
         
         # Variables de control , para movimiento horizontal
