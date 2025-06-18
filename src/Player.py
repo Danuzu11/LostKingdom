@@ -18,7 +18,7 @@ class Player:
         self.can_initiate_new_action = True # Para controlar cuándo se pueden iniciar nuevos saltos/ataques
         
         # Sistema de vida
-        self.max_health = 500
+        self.max_health = 100000
         self.current_health = self.max_health
         self.is_dead = False
         self.attack_damage = 40  # Daño que hace el jugador
@@ -26,6 +26,7 @@ class Player:
         self.has_door_key = False
 
         self.current_surface = None
+
         # Para el da;o
         self.hurt = False
         self.invulnerable = False
@@ -46,12 +47,10 @@ class Player:
 
         # Inicalizamos todas las variabales que usara nuestro jugadorsito
         
-        
-        # Variables de posicion
+        # Variables de posicion primera inicializacion
         self.x = x - 10
         self.y = y - 20
 
-     
         # Variables de direccion (para saber si vamos a izquierda (-1) o derecha (1) )
         self.direction = 1
         
@@ -71,7 +70,7 @@ class Player:
         self.attacking = False
         
         # Tiempo en ms para mantener el combo, para limitar el tiempo en que se concatena un combo, es decir cuando inicia esto no puedes concatenar  denuevo
-        self.combo_timeout = 400
+        self.combo_timeout = 500
         
         # Variables para el control de combos, para saber en que combo estamos el maximo combo y el tiempo que va combo
         self.current_combo = 1
@@ -80,6 +79,7 @@ class Player:
         
         # En este diccionario almacenaremos los diferentes Movimientos DE ATAQUE , es decir attack1 ,2  y asi para saber que frame le ataque pertenece a cual en cada combo
         self.attack_moveset = {}
+
         # Aqui guardaremos igualmente los diferentes comportamientos de nuestro jugador, recordemos que estos objetos son usados para saber que frame y animacion usaremos para cada estado
         self.animations = {"run": [], "attack": [], "jump": [], "idle": []}
         
@@ -91,7 +91,6 @@ class Player:
         self.vertical_velocity = 0
         self.ground_y = y
         
-
         # Varibles para controlar el ancho de rectangulo de colision del personaje, cuando no hace nada y cuando ataca, (porque no quiero que sean del mismo tama;o que el sprite del jugador)
         # Y cuando ataca el rectangulo de colision crecera
         self.base_rect_width = 20
@@ -105,6 +104,7 @@ class Player:
         
         scale_factor = settings.SCALE_FACTOR
         self.scale_factor = settings.SCALE_FACTOR
+
         # Calcula el nuevo offset en Y para centrar el rectángulo con el sprite escalado
         # Suponiendo que el sprite original y el rectángulo estaban alineados antes del escalado:
         self.rect_offset_x = 35  # Puedes ajustar este valor si el rectángulo no está centrado horizontalmente
@@ -116,11 +116,11 @@ class Player:
         
         # correccion de la posicion en y del jugador para que quede en el piso
         self.offset_positiony = 15
-        # self.offset_positiony = self.y
+
         # Ahora, la posición inicial del jugador debe considerar el nuevo offset
-        self.x = x - 10
+        self.x = x - 88
         self.y = self.y - self.offset_positiony
-        # print(self.y)
+
         # Inicializar el rectángulo de colision del jugador
         self.king_rect = pygame.Rect(
             self.pos_player_rectX,
@@ -136,13 +136,6 @@ class Player:
         # Cargar animacion de muerte
         self.load_death_animation()
 
-    def load_death_animation(self):
-        # Cargar la animacion de muerte
-        initial_sprite = 0
-        sprite_moveset_size = 4
-        death_animations = extract_animation_complex_spritesheet("DeathKnight", self.scale_factor)
-        self.animations["death"] = extract_animation_moveset(death_animations, (initial_sprite, sprite_moveset_size))
-        print(len(self.animations["death"]))
     # Verificador de colisiones con el mundo
     def check_collision(self, solid_objects:pygame.Rect):
         # Empezamos a recorrer el arreglo de solidos
@@ -269,7 +262,6 @@ class Player:
                 
             
         # Verificamos colisiones con objetos solidos
-        # En este caso el player no tiene colisiones con enemigos por ahora (evaluar)
         self.check_collision(solid_objects)
         
         # --- CONTROL DE ESTADOS ---  
@@ -284,14 +276,13 @@ class Player:
         # 3. Quieto (venia de correr)   
         elif self.current_state == "run" and self.horizontal_velocity == 0 and self.on_ground: 
             self.current_state = "idle"       
-                            
-        # Current delay es para saber cuanto tiempo tiene que pasar para que se cambie el frame de la animacion
-        if self.current_state == "fall":
-            current_delay = settings.ANIMATIONS_DELAYS["jump"]
-        else:
-            current_delay = settings.ANIMATIONS_DELAYS[self.current_state]         
-  
-  
+
+        # if self.vertical_velocity > 0 and not self.on_ground :
+        #      self.current_frame = 4
+
+        # Current delay es para saber cuanto tiempo tiene que pasar para que se cambie el frame de la animacion       
+        current_delay = settings.ANIMATIONS_DELAYS[self.current_state] 
+
         # Actualizar animacion
         if self.animation_timer >= current_delay:
             self.update_animation()
@@ -309,7 +300,7 @@ class Player:
         # Actualizamos la posicion del rectangulo segun donde este jugador
         self.update_camera_rect()
 
-    # Acutualiza rectangulo de colision
+    # Actualiza rectangulo de colision
     def update_player_rect(self):
         # Actualizar tamaño del rectangulo de colision, dependiendo de si esta atacando o no
         rect_width = self.attack_rect_width if self.attacking else self.base_rect_width
@@ -341,6 +332,7 @@ class Player:
     
     # Metodo para dibujar o renderizar al player en el frame que este ejecutando   
     def render(self, screen,camera_offset=None):
+  
         # Si el jugador esta muerto no renderiza nada
         if self.is_dead:
             if not self.death_animation_completed:
@@ -368,9 +360,10 @@ class Player:
         if self.invulnerable and (pygame.time.get_ticks() // 100) % 2 == 0:
             return
 
-        # Este es igual al metodo render  , pasa que siguiendo el tutorial le pusieron draw y ya me da pereza cambiarlo XD
-        if self.vertical_velocity > 0 and not self.on_ground and not self.horizontal_velocity > 0:
-            self.current_surface = self.animations["jump"][1]  # Frame 2 (índice 1)
+        # Si el jugador esta saltando , carga el frame de caida que seleccionamos uno solo 
+        if self.vertical_velocity > 0 and not self.on_ground :
+            self.current_surface = self.animations["jump"][4]  # Frame 2 (índice 1)
+
         # Aqui es simple si esta atacando carga el frame correspondiente al movimiento de ataque actual
         elif self.attacking:
             attack_frames = self.attack_moveset[f"attack{self.current_combo}"]
@@ -384,11 +377,7 @@ class Player:
         if self.direction == -1:
             self.current_surface = pygame.transform.flip(self.current_surface, True, False)
         
-        # Dibujar información de debug
-        # debug_info = f"Estado: {self.current_state} Combo: {self.current_combo} Frame: {self.current_frame}"
-        # font = pygame.font.Font(None, 36)
-        # text = font.render(debug_info, True, (255, 255, 255))
-        # screen.blit(text, (10, 10))
+
 
         # Usar la posicion ajustada por la camara si está disponible, este es un metodo particular porque aqui la posicion va conforme a la camara
         # Ya que el personaje se movera en conjunto con la camara y los objetos no deben moverse con el
@@ -400,7 +389,7 @@ class Player:
         self.render_health_bar(x,y_render,screen)
         
    
-       # Dibujar el rectangulo de colision
+        # # Dibujar el rectangulo de colision
         # rect_draw_x = self.king_rect.x
         # rect_draw_y = self.king_rect.y
         # if camera_offset:
@@ -412,8 +401,84 @@ class Player:
         #     pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
         #     2,  # Grosor de la línea
         # )
+        #  # Dibujar información de debug
+        # debug_info = f"Estado: {self.current_state} Combo: {self.current_combo} Frame: {self.current_frame}"
+        # font = pygame.font.Font(None, 36)
+        # text = font.render(debug_info, True, (255, 255, 255))
+        # screen.blit(text, (10, 10))
+    
+    
+    
+    
+    
+    
+    
     
     # METODO AUXILIARES
+
+    # Metodo para cargar las animaciones del jugador, aqui esta la logica donde se cargan los spritesheets y se asignan a cada animacion
+    def load_animations(self):
+        
+        # Cargar spritesheets del king en un array para automatizar las animaciones
+        # cabe destacar que esta configurado para trabajar correctamente con 4 frames los ataques
+        scale_factor = settings.SCALE_FACTOR
+        
+        # Recorremos los spritesheets y los frames para asignar las animaciones a cada uno de ellos
+        # Este metodo es importante ya que asi recorremos el spritesheet y le asignamos los frames a cada animacion , dependiendo del tamaño del frame sera los sprites que saque
+        # Por ejemplo si el frame es de 64x64 y el spritesheet tiene 4 frames de 64x64 entonces el resultado sera 4 sprites distintos
+        # Esta configuracion hay que tener en cuenta cuando la agregarmos en la imagen medirla con paint 
+        # digamos que es como que le asignamos un tamaño de recorte y cuando hacemos este for vamos recortando el spritesheet en partes iguales y lo guardamos en un array
+
+
+        # Cargar la animacion de jump, esta en un solo spritesheet
+        player_spritesheet = extract_animation_unique_spritesheet("Player","Jump",scale_factor)
+        initial_sprite = 0
+        sprite_moveset_size = 8
+        self.animations["jump"] = extract_animation_moveset(player_spritesheet, (initial_sprite, sprite_moveset_size))
+
+        # Cargar la animacion de run, esta en un solo spritesheet
+        player_spritesheet = extract_animation_unique_spritesheet("Player","Run",scale_factor)
+        initial_sprite = 0
+        sprite_moveset_size = 8
+        self.animations["run"] = extract_animation_moveset(player_spritesheet, (initial_sprite, sprite_moveset_size))
+
+        # Cargar la animacion de idle, esta en un solo spritesheet
+        player_spritesheet = extract_animation_unique_spritesheet("Player","Idle",scale_factor)
+        initial_sprite = 0
+        sprite_moveset_size = 8
+        self.animations["idle"] = extract_animation_moveset(player_spritesheet, (initial_sprite, sprite_moveset_size))
+
+        # Cargar las animaciones de ataque, todas las animaciones de ataque estan en un solo spritesheet
+        attack_spritesheet = extract_animation_unique_spritesheet("Player","Attack",scale_factor)
+
+        # Cargar el primer ataque, el cual es el que se usa para el combo 1 5 sprites
+        initial_sprite = 0
+        sprite_moveset_size = 5
+        self.attack_moveset["attack1"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size))  
+        
+        # Cargar el segundo ataque, el cual es el que se usa para el combo 2 3 sprites
+        initial_sprite = 7
+        sprite_moveset_size = 3
+        self.attack_moveset["attack2"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size))    
+        
+        # Cargar el tercer ataque, el cual es el que se usa para el combo 3 4 sprites
+        initial_sprite = 10
+        sprite_moveset_size = 4
+        self.attack_moveset["attack3"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size))  
+        
+        # Cargar el cuarto ataque, el cual es el que se usa para el combo 4 6 sprites
+        initial_sprite = 14
+        sprite_moveset_size = 6
+        self.attack_moveset["attack4"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size)) 
+
+    # Cargar la animacion de muerte del player
+    def load_death_animation(self):
+        initial_sprite = 0
+        sprite_moveset_size = 4
+        # death_animations = extract_animation_complex_spritesheet("DeathKnight", self.scale_factor)
+        death_animations = extract_animation_unique_spritesheet("Player","Death",self.scale_factor)
+        self.animations["death"] = extract_animation_moveset(death_animations, (initial_sprite, sprite_moveset_size))
+
     # Actuliza el rectangulo de colision de la camara, es decir el rectangulo que se usa para mover la camara
     def update_camera_rect(self):
         # Este metodo auxiliar para mantener el rectagulo de colision fijo del jugador 
@@ -423,77 +488,6 @@ class Player:
             self.x + self.rect_offset_x * 2 , self.y + self.rect_offset_y, self.base_rect_width, self.base_rect_height
         )
     
-    # Metodo para cargar las animaciones del jugador, aqui esta la logica donde se cargan los spritesheets y se asignan a cada animacion
-    # Todo se guarda en arrays para usar luego
-    def load_animations(self):
-        
-        # Cargar spritesheets del king en un array para automatizar las animaciones
-        # cabe destacar que esta configurado para trabajar correctamente con 4 frames los ataques
-        scale_factor = settings.SCALE_FACTOR
-        
-        self.sprite_sheets = {
-            "run": settings.TEXTURES["kingRun"],
-            "attack": settings.TEXTURES["kingAttack"],
-            "jump": settings.TEXTURES["kingJump"],
-            "idle": settings.TEXTURES["idle"],
-        }
-
-        self.frame_data = {
-            "run": settings.FRAMES["kingRun"],
-            "attack": settings.FRAMES["kingAttack"],
-            "jump": settings.FRAMES["kingJump"],
-            "idle" : settings.FRAMES["idle"],
-        }
-
-        # Recorremos los spritesheets y los frames para asignar las animaciones a cada uno de ellos
-        # Este metodo es importante ya que asi recorremos el spritesheet y le asignamos los frames a cada animacion , dependiendo del tamaño del frame sera los sprites que saque
-        # Por ejemplo si el frame es de 64x64 y el spritesheet tiene 4 frames de 64x64 entonces el resultado sera 4 sprites distintos
-        # Esta configuracion hay que tener en cuenta cuando la agregarmos en la imagen medirla con paint 
-        # digamos que es como que le asignamos un tamaño de recorte y cuando hacemos este for vamos recortando el spritesheet en partes iguales y lo guardamos en un array
-        for animation_type, frames in self.frame_data.items():
-            for frame in frames:
-                surface = pygame.Surface((frame.width, frame.height), pygame.SRCALPHA)
-                surface.blit(self.sprite_sheets[animation_type], (0, 0), frame)
-                # Escalar la superficie al tamaño deseado
-                scaled_surface = pygame.transform.scale(
-                    surface,
-                    (
-                        int(surface.get_width() * scale_factor),
-                        int(surface.get_height() * scale_factor),
-                    ),
-                )
-                self.animations[animation_type].append(scaled_surface)
-               
-
-        #     # Tendremos 4 moveset es decir hasta combo de 4
-        #     # Como los sprites son continuos agarraremos la continuidad de los mismos, osea 1 , 2 , 3....
-        #     # estos numeros representan su posicion en el spritesheet, ejemplo 1 sera el spritesheet uno y asi sucesivamente
-                
-        #     # Guardamos los diferentes moveset que tendra para cada combo
-        #     # En frase simples agarramos por orden del spritesheet:
-        #     # attack 1 : contendra las imagenes 1 2 y 3 del spritesheet
-        #     # attack 2 : contendra las imagenes 4 5 6 y 7 del spritesheet y asi sucesivamente
-        #     # Leyendo el spritesheet de izquierda a derecha
-
-            
-        attack_spritesheet = extract_animation_unique_spritesheet("Player","Attack",scale_factor)
-          
-        initial_sprite = 2
-        sprite_moveset_size = 4
-        self.attack_moveset["attack1"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size))  
-        
-        initial_sprite = 6
-        sprite_moveset_size = 2
-        self.attack_moveset["attack2"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size))    
-        
-        initial_sprite = 11
-        sprite_moveset_size = 3
-        self.attack_moveset["attack3"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size))  
-        
-        initial_sprite = 15
-        sprite_moveset_size = 4
-        self.attack_moveset["attack4"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size)) 
-
     # Hay veces que hay que reniciar los combos y devolverlos a su estado principal este metodo es para eso , nada mas simple ahorro de codigo
     def reset_attack(self):
         self.current_combo = 1
@@ -533,15 +527,23 @@ class Player:
             else:
                 # Determinar que frames usar basado en el combo actual, es decir vemos a que frame de ataque pertenece el combito de perros actual de ataque
                 attack_frames = self.attack_moveset[f"attack{self.current_combo}"]
-                
-                # Si el frame actual es el ultimo, resetear el ataque , osea si es el combo 4 devuelve al primero
-                if self.current_frame >= len(attack_frames) - 1:
-                    self.reset_attack()
-                    
-                # De lo contrario sigue explotandolo a combos    
-                else:
-                    self.current_frame += 1
+                current_delay = settings.ANIMATIONS_DELAYS[f"attack{self.current_combo}"]
 
+                if self.animation_timer >= current_delay:
+                    if self.current_frame >= len(attack_frames) - 1:
+                        self.reset_attack()
+                    else:
+                        self.current_frame += 1
+                    self.animation_timer = 0
+
+                # # Si el frame actual es el ultimo, resetear el ataque , osea si es el combo 4 devuelve al primero
+                # if self.current_frame >= len(attack_frames) - 1:
+                #     self.reset_attack()
+                    
+                # # De lo contrario sigue explotandolo a combos    
+                # else:
+                #     self.current_frame += 1
+        
         else:
             
             # Para animaciones normales (run, jump, idle) simplemente aplica la logica rotativa para ir de aumentando el frame en ciclo
@@ -551,6 +553,7 @@ class Player:
                 self.animations[self.current_state]
             )
     
+    # Metodo para renderizar la barra de vida del jugador
     def render_health_bar(self, x,y,screen):
         # Renderizar la barra de salud
         bar_x = x + self.rect_offset_x + self.base_rect_width 

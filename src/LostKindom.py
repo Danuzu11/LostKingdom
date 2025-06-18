@@ -1,11 +1,8 @@
 import pygame
-
 from gale.game import Game
 from gale.state import StateMachine
 from gale.input_handler import InputData
-
 import settings
-
 from src import states
 
 class LostKindom(Game):
@@ -22,15 +19,16 @@ class LostKindom(Game):
             }
         )
         self.state_machine.game = self
-        self.state_machine.change("video")       
+        self.state_machine.change("play")       
         # settings.SOUNDS["principal_theme"].play(loops=-1)
-        
+
     def update(self, dt: float) -> None:
         self.state_machine.update(dt)
 
     def render(self, surface: pygame.Surface) -> None:
         # surface.blit(settings.TEXTURES["menu"], (0, 0))
         self.state_machine.render(surface)
+
 
     def on_input(self, input_id: str, input_data: InputData) -> None:
 

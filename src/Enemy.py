@@ -345,7 +345,6 @@ class Enemy:
     def check_collision_with_player(self, player):
         self.update_rect()
         if self.rect.colliderect(player.king_rect): 
-            print("colisiono con el jugador") 
             return True
         else:
             return False
@@ -367,7 +366,7 @@ class Enemy:
         self.x += knockback_distance
         self.update_rect()
     
-        
+    # Verifica si hay piso enfrente del enemigo    
     def check_ground(self, solid_objects):
         """
         Verifica si hay piso en la dirección del movimiento del enemigo
@@ -386,15 +385,19 @@ class Enemy:
                 return True
         return False
     
+    # Actualiza el enemigo, y recibe la data del player y los solidos
     def update(self, delta_time, player, solid_objects):
+
         # Si el enemigo esta muerto, no actualizar
-        
-        if self.is_dead:      
+        if self.is_dead: 
+
+            # Si empezo la muerte reproduce sonido de muerte
             if not self.start_death:
                 settings.DEATH_SOUNDS[self.name].play()
                 settings.DEATH_SOUNDS[self.name].set_volume(1.0)
                 self.start_death = True
-                 
+
+            # Si la animacion de muerte no ha terminado, actualizar la animacion de muerte
             if not self.death_animation_completed:
                 self.current_state = "death"
                 self.death_animation_timer += delta_time
@@ -412,9 +415,9 @@ class Enemy:
      
             return
          
+        # Actualizar el timer de la animacion
         self.animation_timer += delta_time 
-        # self.waiting = False
-
+ 
         # Verificar si hay piso debajo
         has_ground = self.check_ground(solid_objects)
 
@@ -423,16 +426,17 @@ class Enemy:
     
         # Logica de ataque al jugador (sin bloquear movimiento)
         self.check_attack_player(player)
+
         # Si esta herido, aplicar knockback y controlar invulnerabilidad
         if self.hurt:
-            self.apply_knockback(delta_time, solid_objects)
+
+            # self.apply_knockback(delta_time, solid_objects)
             if pygame.time.get_ticks() - self.hurt_timer > self.hurt_duration:
                 self.hurt = False
-                # self.current_state = "idle"
-                # self.current_frame = 0
+
             self.update_rect() # Actualizar rect por si el knockback cambió x
             
-            if self.current_state != "idle": # O un estado "hurt_idle" si lo tienes
+            if self.current_state != "idle": # Usamos el frame de 'idle' para mostrar cuando lo hieren
                 self.current_state = "idle"
                 self.current_frame = 0
                 self.animation_timer = 0
@@ -448,7 +452,7 @@ class Enemy:
             if self.rect.colliderect(player.king_rect):
                 if player.attacking and not self.attacking:
                     self.receive_hit(-1 if self.x < player.x else 1, player.attack_damage)
-                elif self.attacking and not player.attacking:
+                elif self.attacking and player.attacking:
                     player.receive_hit(-1 if player.x < self.x else 1, self.attack_damage)
                     
         # Si no hay piso, solo detener el movimiento horizontal
@@ -463,8 +467,8 @@ class Enemy:
             self.waiting = False
         
         # Calculamos la distancia horizontal al jugador
-        # distance_to_player = abs(self.x - player.x)
         distance_to_player = abs(self.rect.centerx - player.king_rect.centerx)
+
         # Verificamos si el jugador está dentro del rango de visión horizontal Y a una altura aceptable
         in_range_player = distance_to_player <= self.detection_range
         has_vision = self.has_line_of_sight(player, solid_objects)
@@ -472,8 +476,8 @@ class Enemy:
         
         planned_direction = self.direction # Por defecto, mantener dirección actual
         self.horizontal_velocity = 0
-        # self.attacking se determinará aquí y se usará para update_rect más adelante
 
+        # self.attacking se determinará aquí y se usará para update_rect más adelante
         # Logica de Orientación PRIORITARIA si el jugador está detectado y visible
         if has_vision and in_range_player : # Un poco más que detection_range para voltear
             planned_direction = 1 if player.x > self.x else -1  
@@ -484,6 +488,8 @@ class Enemy:
             
         # Cooldown de persecución tras golpear o ser golpeado
         if current_time - self.last_pursuit_time < self.pursuit_cooldown:
+
+            # Si esta atacando, actualizamos el estado a atacar
             if self.current_state == "attack":
                 if self.current_frame < len(self.animations["attack"]) - 1:
                     current_delay = settings.ANIMATIONS_ENEMY_DELAYS[self.name][self.current_state]
@@ -492,6 +498,8 @@ class Enemy:
                         self.animation_timer = 0
                     self.update_rect()
                     return
+            
+            # Si no esta atacando, actualizamos el estado a idle
             else:
                 self.current_state = "idle"
                 self.attacking = False
@@ -505,17 +513,21 @@ class Enemy:
                 return
         
         # Aplicar la dirección decidida
-        self.direction = planned_direction # Siempre actualizar la dirección basada en la última lógica de orientación
+        # Siempre actualizar la dirección basada en la última lógica de orientación
+        self.direction = planned_direction 
+
         
         # Logica de ataque (funciona independientemente de si hay suelo o no)
-        # print(f"distancia: ",distance_to_player)
-        # print(f"rango: ",distance_to_player)
         if distance_to_player <= self.attack_range and in_range_player and has_vision  :
+
+            # Si no esta atacando y el tiempo de ataque es mayor al cooldown, actualizamos el estado a atacar
             if not self.attacking and (current_time - self.last_attack_time >= self.attack_cooldown):
                 self.current_state = "attack"
                 self.attacking = True
                 self.current_frame = 0
                 self.last_attack_time = current_time
+
+            # Si esta atacando, actualizamos el estado a atacar
             elif self.attacking:
                 self.current_state = "attack"
                 if self.current_frame == len(self.animations["attack"]) - 1:
@@ -525,13 +537,20 @@ class Enemy:
                 
         # Solo perseguir si hay suelo
         elif has_ground and in_range_player and has_vision and not collision:
+
+            # Si no esta en el estado de correr, reiniciamos el frame, por seguridad
             if self.current_state != "run":
                 self.current_frame = 0
+
+            # Actualizamos el estado a correr
             self.current_state = "run"
             self.direction = -1 if self.x > player.x else 1
             self.horizontal_velocity = self.direction * settings.ENEMY_SPEED
             self.attacking = False
+        
+        # De lo contrario se quedara parado
         else:
+            # Si no esta en el estado de idle, reiniciamos el frame, por seguridad
             if self.current_state != "idle":
                 self.current_frame = 0
             self.current_state = "idle"
@@ -545,21 +564,25 @@ class Enemy:
         else:
             self.horizontal_velocity = 0
 
-   
+        # Verificar colisiones con el mundo
         self.check_collision_with_world(solid_objects)
         
         # Current delay es para saber cuanto tiempo tiene que pasar para que se cambie el frame de la animacion
         current_delay = settings.ANIMATIONS_ENEMY_DELAYS[self.name][self.current_state]
+
         # Actualizar animacion
         if self.animation_timer >= current_delay:
             self.update_animation(delta_time)
             self.animation_timer = 0
         
+        # Actualizamos el rectangulo de colision
         self.update_rect()
         
+    # Actualiza la animacion del enemigo
     def update_animation(self, delta_time):
         self.current_frame = (self.current_frame + 1) % len(self.animations[self.current_state])
 
+    # Dibuja el enemigo, igual al metodo render
     def draw(self, screen, camera_offset=(0, 0), player=None, solid_objects=None):
     
         if self.is_dead:
@@ -592,6 +615,7 @@ class Enemy:
         else:
             screen.blit(current_surface, (self.x - offset[0], self.y - offset[1] - self.floor_correct))
         
+        # # AREA DE DEBUG 
         # Dibujar el rectangulo de colision 
         # rect_to_draw = pygame.Rect(
         #     self.rect.x - offset[0],
@@ -627,6 +651,9 @@ class Enemy:
         #                         (clipped[0][0] - camera_offset[0], clipped[0][1] - camera_offset[1]),
         #                         (clipped[1][0] - camera_offset[0], clipped[1][1] - camera_offset[1]), 3)                                        
     
+        # # FIN DEBUG
+        
+    # Dibuja la barra de vida del enemigo
     def render_health_bar(self, x,y,screen,camera_offset):
         # Renderiza la barra de vida del enemigo
         health_bar_width = 50

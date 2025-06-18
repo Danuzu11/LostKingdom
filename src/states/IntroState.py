@@ -15,7 +15,6 @@ class IntroState(BaseState):
         self.fade_out = False
 
         # Variables para el texto
-        # self.font = pygame.font.Font(None, 32)
         self.font = settings.FONTS["medium"]
         self.font2 = settings.FONTS["medium"]
         self.current_text = ""

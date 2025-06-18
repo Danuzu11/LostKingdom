@@ -29,7 +29,7 @@ Enemies = {
             "scale_factor": 1.6,
             "max_health": 100,
             "attack_range": 45,
-            "detection_range": 200,
+            "detection_range": 300,
             "attack_damage": 13,
             
             # Corecccion de la barra de vida del enemigo
@@ -64,7 +64,7 @@ Enemies = {
             # Datos base del enemigo
             "max_health": 100,
             "attack_range": 45,
-            "detection_range": 200,
+            "detection_range": 300,
             "attack_damage": 10,
             
             # Correcion en la posicion del piso base del enemigo para que no cambie segun su rectangulo de colision
@@ -101,7 +101,7 @@ Enemies = {
         # Datos base del enemigo
         "max_health": 300,
         "attack_range": 45,
-        "detection_range": 400,
+        "detection_range": 500,
         "attack_damage": 30,
         
         # Correccion del piso
@@ -128,7 +128,7 @@ Enemies = {
         "enemy_rect_offset_y": -45,
         
         # Rect�ngulo de ataque
-        "attack_rect_width": 65,
+        "attack_rect_width": 75,
         
         # Correcci�n extra para la posici�n en Y
         "extra_custom_offset_y": -45,
@@ -139,7 +139,7 @@ Enemies = {
         # Datos base del enemigo
         "max_health": 80,
         "attack_range": 45,
-        "detection_range": 200,
+        "detection_range": 300,
         "attack_damage": 100,
         
         # Correccion del piso
@@ -165,18 +165,18 @@ Enemies = {
         "enemy_rect_offset_y": -45,
         
         # Rect�ngulo de ataque
-        "attack_rect_width": 60,
+        "attack_rect_width": 50,
         
         # Correcci�n extra para la posici�n en Y
         "extra_custom_offset_y": -60,
         
         # Factor de escalado 
-        "scale_factor": 1.2,
+        "scale_factor": 1.5,
         
         # Datos base del enemigo
         "max_health": 80,
-        "attack_range": 45,
-        "detection_range": 200,
+        "attack_range": 40,
+        "detection_range": 300,
         "attack_damage": 15,
         
         # Correcci�n del piso
