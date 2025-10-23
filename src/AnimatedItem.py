@@ -14,12 +14,24 @@ class AnimatedItem:
         self.current_frame = 0
         self.animation_timer = 0
         self.name = name
+        
+        # Añadir rectángulo para el sistema de culling
+        if len(frames) > 0:
+            frame_width = frames[0].get_width()
+            frame_height = frames[0].get_height()
+            self.rect = pygame.Rect(x, y, frame_width, frame_height)
+        else:
+            self.rect = pygame.Rect(x, y, 32, 32)  # Tamaño por defecto
 
     def update(self, delta_time):
         self.animation_timer += delta_time
         if self.animation_timer >= self.animation_delay:
             self.current_frame = (self.current_frame + 1) % len(self.frames)
             self.animation_timer = 0
+        
+        # Actualizar rectángulo para el sistema de culling
+        self.rect.x = self.x
+        self.rect.y = self.y
 
     def draw(self, screen, camera_offset):
         frame = self.frames[self.current_frame]

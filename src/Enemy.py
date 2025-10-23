@@ -3,6 +3,7 @@ import settings
 
 from src.globalUtilsFunctions import extract_animation_moveset , extract_animation_complex_spritesheet, extract_animation_unique_spritesheet
 from src.definitions.enemies import Enemies
+from src.EnemyStateMachine import EnemyStateMachine
 
 class Enemy:
     def __init__(self, x, y, name):
@@ -104,6 +105,9 @@ class Enemy:
             self.base_rect_width,
             self.base_rect_height,
         )
+        
+        # Sistema de estados mejorado (respetando escalado)
+        self.state_machine = EnemyStateMachine(self)
         
         self.initial_x = self.x
         
@@ -385,7 +389,7 @@ class Enemy:
     
     # Actualiza el enemigo, y recibe la data del player y los solidos
     def update(self, delta_time, player, solid_objects):
-
+        
         # Si el enemigo esta muerto, no actualizar
         if self.is_dead: 
 
@@ -412,9 +416,18 @@ class Enemy:
                  
      
             return
-         
+        
+        # Sistema de estados mejorado (respetando escalado y correcciones)
+        self.state_machine.update(delta_time, player, solid_objects)
+        
         # Actualizar el timer de la animacion
-        self.animation_timer += delta_time 
+        self.animation_timer += delta_time
+        
+        # Actualizar animaciones con el sistema original
+        current_delay = settings.ANIMATIONS_ENEMY_DELAYS[self.name][self.current_state]
+        if self.animation_timer >= current_delay:
+            self.update_animation(delta_time)
+            self.animation_timer = 0
  
         # Verificar si hay piso debajo
         has_ground = self.check_ground(solid_objects)
@@ -579,7 +592,13 @@ class Enemy:
         
     # Actualiza la animacion del enemigo
     def update_animation(self, delta_time):
-        self.current_frame = (self.current_frame + 1) % len(self.animations[self.current_state])
+        # Verificación de seguridad para evitar IndexError
+        if (self.current_state in self.animations and 
+            len(self.animations[self.current_state]) > 0):
+            self.current_frame = (self.current_frame + 1) % len(self.animations[self.current_state])
+        else:
+            # Si no hay animaciones para el estado actual, resetear frame
+            self.current_frame = 0
 
     # Dibuja el enemigo, igual al metodo render
     def draw(self, screen, camera_offset=(0, 0), player=None, solid_objects=None):
@@ -601,7 +620,22 @@ class Enemy:
         if self.invulnerable and (pygame.time.get_ticks() // 100) % 2 == 0:
             return
 
-        current_surface = self.animations[self.current_state][self.current_frame]
+        # Verificación de seguridad para evitar IndexError
+        if (self.current_state in self.animations and 
+            len(self.animations[self.current_state]) > 0 and 
+            self.current_frame < len(self.animations[self.current_state])):
+            current_surface = self.animations[self.current_state][self.current_frame]
+        else:
+            # Fallback: usar la primera animación disponible
+            if len(self.animations) > 0:
+                first_state = list(self.animations.keys())[0]
+                if len(self.animations[first_state]) > 0:
+                    current_surface = self.animations[first_state][0]
+                else:
+                    # Crear una superficie vacía como último recurso
+                    current_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
+            else:
+                current_surface = pygame.Surface((32, 32), pygame.SRCALPHA)
         
         if self.direction == -1:
             current_surface = pygame.transform.flip(current_surface, True, False)

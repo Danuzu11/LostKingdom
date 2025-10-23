@@ -10,10 +10,19 @@ import src.Enemy as Enemy
 from src.globalUtilsFunctions import fade 
 from src.QuadTree import QuadTree
 from src.SnowEffect import SnowEffect
+from src.EnemyPool import EnemyPool
 
 class PlayState(BaseState):
     
     def enter(self, **params: dict):
+        
+        # Sistema de culling mejorado
+        self.visible_enemies = []
+        self.visible_animated_items = []
+        self.culling_padding = 100  # Píxeles de padding para suavizar transiciones
+        
+        # Sistema de Object Pooling para enemigos
+        self.enemy_pool = EnemyPool(max_size=20)
         
         # Variables para el fade in
         self.fade_alpha = 255
@@ -157,6 +166,7 @@ class PlayState(BaseState):
                             objects.width * scale_factor,
                             objects.height * scale_factor,
                 )
+                print(f"Door trigger cargado: {self.door_trigger}")
                 # NO agregar a solid_objects ya que door_trigger no es un objeto sólido
             
             # Detecta objetos animados del mundo, como antorchar fogatas, etc.
@@ -380,7 +390,9 @@ class PlayState(BaseState):
     # Actualiza el tiempo y los estados del juego, es el que permite que todo avance y se mueva          
     def update(self, dt: float) -> None:
         
- 
+        # Sistema de culling mejorado - solo procesar objetos visibles
+        self.update_visible_objects()
+
         # Manejar el fade in
         if self.fade_in:
             self.fade_alpha = max(0, self.fade_alpha - self.fade_speed)
@@ -436,11 +448,20 @@ class PlayState(BaseState):
             settings.VIRTUAL_HEIGHT + quadtree_padding * 2
         )
         
-        # 2. Crear/Reconstruir el Quadtree
-        # max_objects y max_depth son los parametros para verificar la cantidad de objetos que se pueden almacenar en el Quadtree
-        # max_objects es el numero maximo de objetos que se pueden almacenar en el Quadtree
-        # max_depth es la profundidad maxima del Quadtree
-        self.collision_quadtree = QuadTree(quadtree_bounds, max_objects=7, max_depth=6)
+        # 2. Crear/Reconstruir el Quadtree con parámetros dinámicos
+        # Parámetros dinámicos basados en la cantidad de objetos para optimizar rendimiento
+        object_count = len(self.solid_objects)
+        if object_count < 10:
+            max_objects = 4
+            max_depth = 3
+        elif object_count < 50:
+            max_objects = 6
+            max_depth = 4
+        else:
+            max_objects = 8
+            max_depth = 5
+        
+        self.collision_quadtree = QuadTree(quadtree_bounds, max_objects=max_objects, max_depth=max_depth)
  
         # Insertamos los objetos solidos en el Quadtree
         for solid_rect in self.solid_objects:
@@ -476,28 +497,31 @@ class PlayState(BaseState):
                     self.animated_items.remove(animated_item)  # Eliminar la llave
                     self.player.has_key = True
   
-        # Actualizar enemigos y limpiar los muertos
-        enemies_to_remove = []
-        for enemy in self.enemies:
+        # Actualizar enemigos (solo los visibles)
+        for enemy in self.visible_enemies:
             # Obtener solidos cercanos para cada enemigo
             enemy_query_rect = enemy.rect.inflate(500, 500) 
             nearby_solid_data_enemy = self.collision_quadtree.query(enemy_query_rect)
             solid_objects_for_enemy = [data['rect'] for data in nearby_solid_data_enemy if data['type'] == "solid"]
             enemy.update(delta_time, self.player, solid_objects_for_enemy)
-            
-            # Marcar enemigos muertos para eliminación
+        
+        # Limpiar enemigos muertos del mapa (sistema original)
+        enemies_to_remove = []
+        for enemy in self.enemies:
             if enemy.is_dead and enemy.death_animation_completed:
                 enemies_to_remove.append(enemy)
         
-        # Eliminar enemigos muertos para evitar memory leaks
         for enemy in enemies_to_remove:
-            self.enemies.remove(enemy) 
+            self.enemies.remove(enemy)
+        
+        # Limpiar enemigos muertos del pool
+        self.enemy_pool.cleanup_dead_enemies() 
             
         # Actualiza la posicion de la camara
         self.camera.update(self.player.camera_rect, None)   
         
-        # Actualizar objetos animados
-        for animated_item in self.animated_items:
+        # Actualizar objetos animados (solo los visibles)
+        for animated_item in self.visible_animated_items:
             animated_item.update(delta_time)
 
     # Renderizar el estado de juego
@@ -514,8 +538,8 @@ class PlayState(BaseState):
         surface.blit(self.map_image, map_pos)
             
    
-        # Dibujar objetos animados (solo los visibles)
-        for animated_item in self.animated_items:
+        # Dibujar objetos animados (solo los visibles - sistema de culling mejorado)
+        for animated_item in self.visible_animated_items:
             # Obtener el frame actual para determinar sus dimensiones
             if animated_item.frames: 
                 current_sprite_frame = animated_item.frames[animated_item.current_frame]
@@ -550,12 +574,19 @@ class PlayState(BaseState):
         elif not self.player.has_key and self.door_trigger and self.player.king_rect.colliderect(self.door_trigger):
             surface = self.draw_door_indicator("Necesitas la llave para abrir", surface, (255, 0, 0), (255, 255, 255))
 
-        # Dibujar enemigos (solo los visibles)
-        for enemy in self.enemies:
+        # Dibujar enemigos (solo los visibles - sistema de culling mejorado)
+        for enemy in self.visible_enemies:
             # Si el enemigo tiene un rectangulo, se dibuja en la pantalla
-            if hasattr(enemy, 'rect') and camera_view_rect.colliderect(enemy.rect):
+            if hasattr(enemy, 'rect'):
                 # Dibujamos el enemigo en la pantalla ya con el offset de la camara
                 enemy.draw(surface, (self.camera.offset_x, self.camera.offset_y),self.player,self.solid_objects)
+        
+        # Debug: Mostrar información de enemigos
+        if len(self.visible_enemies) > 0:
+            debug_info = f"Enemigos visibles: {len(self.visible_enemies)}/{len(self.enemies)}"
+            font = pygame.font.Font(None, 24)
+            text = font.render(debug_info, True, (255, 255, 255))
+            surface.blit(text, (10, 10))
             
                       
         # Dibujar al jugador
@@ -595,6 +626,37 @@ class PlayState(BaseState):
             surface.blit(self.fade_surface, (0, 0))
 
         # FIN DE DRAW PARA DEBUGS
+
+    def update_visible_objects(self):
+        """Sistema de culling mejorado - solo procesar objetos visibles."""
+        # Crear rectángulo de cámara expandido para suavizar transiciones
+        camera_rect = pygame.Rect(
+            self.camera.offset_x - self.culling_padding,
+            self.camera.offset_y - self.culling_padding,
+            settings.VIRTUAL_WIDTH + self.culling_padding * 2,
+            settings.VIRTUAL_HEIGHT + self.culling_padding * 2
+        )
+        
+        # Filtrar enemigos visibles (combinando enemigos del mapa y del pool)
+        self.visible_enemies = []
+        # Usar enemigos del mapa (cargados desde TMX) y del pool
+        all_enemies = self.enemies + self.enemy_pool.get_active_enemies()
+        for enemy in all_enemies:
+            if self.should_render_object(enemy.rect, camera_rect):
+                self.visible_enemies.append(enemy)
+        
+        # Filtrar objetos animados visibles
+        self.visible_animated_items = []
+        for animated_item in self.animated_items:
+            # Verificar que el objeto tiene 'rect' antes de usarlo
+            if hasattr(animated_item, 'rect'):
+                # Las llaves siempre son visibles para que se puedan recoger
+                if animated_item.name == "key" or self.should_render_object(animated_item.rect, camera_rect):
+                    self.visible_animated_items.append(animated_item)
+    
+    def should_render_object(self, obj_rect, camera_rect):
+        """Determina si un objeto debe ser renderizado basado en la cámara."""
+        return camera_rect.colliderect(obj_rect)
 
     # Dibuja el indicador cuando el jugador esta frente a la puerta
     def draw_door_indicator(self, text , surface , colorPolygon , colorText ):
