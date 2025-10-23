@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="17" nextobjectid="147">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="50" tilewidth="32" tileheight="32" infinite="0" nextlayerid="17" nextobjectid="150">
  <tileset firstgid="1" source="DecoracionCastillo.tsx"/>
  <tileset firstgid="42" source="Castillo.tsx"/>
  <tileset firstgid="198" source="background_layer_1.tsx"/>
@@ -636,6 +636,15 @@
    <point/>
   </object>
   <object id="146" name="castleTorch" x="867" y="811">
+   <point/>
+  </object>
+  <object id="147" name="ladder_start" x="770" y="255.333">
+   <point/>
+  </object>
+  <object id="148" name="ladder_middle" x="861.333" y="345.333">
+   <point/>
+  </object>
+  <object id="149" name="ladder_end" x="960" y="447">
    <point/>
   </object>
  </objectgroup>

@@ -650,13 +650,13 @@ class Enemy:
         
         # # AREA DE DEBUG 
         # Dibujar el rectangulo de colision 
-        rect_to_draw = pygame.Rect(
-            self.rect.x - offset[0],
-            self.rect.y - offset[1],
-            self.rect.width,
-            self.rect.height,
-        )
-        pygame.draw.rect(screen, (255, 0, 0), rect_to_draw, 2)
+        # rect_to_draw = pygame.Rect(
+        #     self.rect.x - offset[0],
+        #     self.rect.y - offset[1],
+        #     self.rect.width,
+        #     self.rect.height,
+        # )
+        # pygame.draw.rect(screen, (255, 0, 0), rect_to_draw, 2)
         
         # Dibujar el rectángulo de deteccion de suelo
         # ground_check = pygame.Rect(

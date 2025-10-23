@@ -294,7 +294,7 @@ ANIMATIONS_ENEMY_DELAYS = {
     "NightBorne": {
         "idle": 100,
         "run": 100,
-        "attack": 80,
+        "attack": 50,  # Animación de ataque más fluida
         "death": 100,
     },
     "Golem": {
@@ -318,10 +318,11 @@ ANIMATIONS_ENEMY_DELAYS = {
     "Executoner": {
         "idle": 180,
         "run": 100,
-        "attack": 100,
+        "attack": 70,  # Animación de ataque más fluida
         "death": 100,
     }
 }
+
 
 
 

@@ -439,12 +439,15 @@ class Player:
         if camera_offset:
             rect_draw_x = self.king_rect.x - self.x + x
             rect_draw_y = self.king_rect.y - self.y + y
-        pygame.draw.rect(
-            screen,
-            (255, 0, 0),  # Color rojo
-            pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
-            2,  # Grosor de la línea
-        )
+        
+        # Dibujar el rectangulo de colision del jugador
+        # pygame.draw.rect(
+        #     screen,
+        #     (255, 0, 0),  # Color rojo
+        #     pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
+        #     2,  # Grosor de la línea
+        # )
+
          # Dibujar información de debug
         debug_info = f"Estado: {self.current_state} Combo: {self.current_combo} Frame: {self.current_frame}"
         font = pygame.font.Font(None, 36)
@@ -662,6 +665,7 @@ class Player:
         # death_animations = extract_animation_complex_spritesheet("DeathKnight", self.scale_factor)
         death_animations = extract_animation_unique_spritesheet("Player","Death",self.scale_factor)
         self.animations["death"] = extract_animation_moveset(death_animations, (initial_sprite, sprite_moveset_size))
+        
 
     # Actuliza el rectangulo de colision de la camara, es decir el rectangulo que se usa para mover la camara
     def update_camera_rect(self):

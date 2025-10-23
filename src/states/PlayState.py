@@ -237,6 +237,7 @@ class PlayState(BaseState):
                 )
                 self.enemies.append(enemy)      
             # FIN DE LOS ENEMIGOS
+            
              
             # Esta apartado es especial , se usa para cargar lo que coloques objetos como mascaras (Por encima del jugador) en Tiled                      
             elif objects.name == "mask":
@@ -247,6 +248,7 @@ class PlayState(BaseState):
                     objects.height * scale_factor,
                 )
                 self.mask_objects.append(mask_rect)
+        
     
         # Indica que estamos haciendo fade in
         self.fade_in = True
@@ -600,14 +602,14 @@ class PlayState(BaseState):
         # DRAW PARA DEBUGS
 
         #Dibujar los objetos sólidos
-        for solid in self.solid_objects:
-            rect_with_offset = pygame.Rect(
-                solid.x - self.camera.offset_x,
-                solid.y - self.camera.offset_y,
-                solid.width,
-                solid.height
-            )
-            pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
+        # for solid in self.solid_objects:
+        #     rect_with_offset = pygame.Rect(
+        #         solid.x - self.camera.offset_x,
+        #         solid.y - self.camera.offset_y,
+        #         solid.width,
+        #         solid.height
+        #     )
+        #     pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
         
         # Debug info
         # debug_info = f"Camera: ({self.camera.offset_x}, {self.camera.offset_y})"
@@ -657,6 +659,7 @@ class PlayState(BaseState):
     def should_render_object(self, obj_rect, camera_rect):
         """Determina si un objeto debe ser renderizado basado en la cámara."""
         return camera_rect.colliderect(obj_rect)
+    
 
     # Dibuja el indicador cuando el jugador esta frente a la puerta
     def draw_door_indicator(self, text , surface , colorPolygon , colorText ):
