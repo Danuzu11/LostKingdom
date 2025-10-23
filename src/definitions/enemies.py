@@ -99,7 +99,7 @@ Enemies = {
         "scale_factor": 1.8,
         
         # Datos base del enemigo
-        "max_health": 300,
+        "max_health": 1,
         "attack_range": 45,
         "detection_range": 500,
         "attack_damage": 30,

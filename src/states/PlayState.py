@@ -12,7 +12,9 @@ from src.QuadTree import QuadTree
 from src.SnowEffect import SnowEffect
 
 class PlayState(BaseState):
+    
     def enter(self, **params: dict):
+        
         # Variables para el fade in
         self.fade_alpha = 255
         self.fade_surface = pygame.Surface((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
@@ -21,10 +23,14 @@ class PlayState(BaseState):
         self.door_trigger = None
         self.fade_in = True
         self.fade_out = False
+        # settings.SOUNDS["relaxtheme"].stop()
+        # settings.SOUNDS["relaxtheme"].play(loops=-1) 
+        # settings.SOUNDS["relaxtheme"].set_volume(1)
         
         # Velocidad más lenta para el fade out
         self.fade_out_speed = 0.7
-         # Para saber porque se esta haciendo el fade out
+        
+        # Para saber porque se esta haciendo el fade out
         self.fade_out_reason = None 
         
          # Lista de niveles disponibles
@@ -45,13 +51,15 @@ class PlayState(BaseState):
             self.fade_in = False 
             self.current_level_index = params.get("current_level_index", 0)
             self.door_trigger = params.get("door_trigger", None)
-
+            self.doors = params.get("doors",None)
+            
             if self.current_level_index == 2:
                 settings.SOUNDS["principal_theme"].stop()
                 settings.SOUNDS["deepgrowl"].play()  # Reproducir música de jefe si es el tercer nivel
                 settings.SOUNDS["boss"].play(-1)  # Reproducir música de jefe si es el tercer nivel
                 
             level_name = params.get("level_name")
+            
             if level_name:
                 self.load_level(level_name)
 
@@ -94,7 +102,7 @@ class PlayState(BaseState):
             settings.SCALE_FACTOR = 1
         else:
             # Si el mapa es mas peque;o que la ventana, se escala el mapa para que se vea mas grande
-            settings.SCALE_FACTOR = 1.3
+            settings.SCALE_FACTOR = 1.4
       
         # Inicializar la cámara, con el tama;o total del mapa para que se pueda ver todo y se mueva en el
         self.camera = Camera()
@@ -149,8 +157,7 @@ class PlayState(BaseState):
                             objects.width * scale_factor,
                             objects.height * scale_factor,
                 )
-               
-                self.solid_objects.append(solid_rect)
+                # NO agregar a solid_objects ya que door_trigger no es un objeto sólido
             
             # Detecta objetos animados del mundo, como antorchar fogatas, etc.
             elif objects.name in settings.ANIMATED_DECORATIONS:
@@ -172,8 +179,8 @@ class PlayState(BaseState):
                 decoration_rect = pygame.Rect(
                     objects.x * scale_factor - decoration_data["correctionX"],
                     objects.y * scale_factor - decoration_data["correctionY"],
-                    decoration_data["texture"].get_width(),
-                    decoration_data["texture"].get_height()
+                    decoration_data["texture"].get_width() ,
+                    decoration_data["texture"].get_height() 
                 )
                 
                 # Guardar la puerta en el array de puertas
@@ -237,12 +244,22 @@ class PlayState(BaseState):
         # Inicializar el jugador
         # Solo crear un nuevo jugador si no existe uno
         if not hasattr(self, 'player'):
+            if self.current_tile_map.height > max_pixel_height:
+                self.player.jump_offset = 1.03
+                self.player.scale_factor = 1.3
             self.player = Player(self.player_x, self.player_y)
         else:
             # Actualizar la posición del jugador existente
             self.player.x = self.player_x
             self.player.y = self.player_y
-        
+            
+            if self.current_tile_map.height > max_pixel_height:
+                self.player.jump_offset = 1.03
+                self.player.scale_factor = 1.3
+                self.player.load_animations()
+                self.player.load_death_animation()
+            
+            
         # Inicializar el jugador
         # self.player = Player(self.player_x, self.player_y)   
     
@@ -267,7 +284,8 @@ class PlayState(BaseState):
                 enemies=self.enemies,
                 current_tile_map=self.current_tile_map,
                 map_image=self.map_image,
-                door_trigger=self.door_trigger
+                door_trigger=self.door_trigger,
+                doors = self.doors
             )
 
         # Verifica si se presiono la tecla F para interactuar por ahora solo con la puerta
@@ -338,56 +356,21 @@ class PlayState(BaseState):
                 if self.player.on_ground and not self.player.jumping:
                     self.player.current_state = "idle"
        
-        # Detecta la tecla de salto y solo puede salta si el jugador esta en el suelo
-        if input_id == "jump" and not self.player.jumping:
-
-            # Rectificamos que si el jugador esta en el suelo y no esta saltando, entonces salta
-            if self.player.on_ground and not self.player.jumping:
-                self.player.jumping = True
-                self.player.current_state = "jump"
-                new_state = "jump"
-                self.player.jumping = True
-                self.player.vertical_velocity = settings.PLAYER_SPEED_JUMP
-                self.player.current_combo = 1
-                self.player.current_frame = 0
-                self.player.attacking = False
+        # Detecta la tecla de salto con sistema de buffer mejorado
+        if input_id == "jump":
+            if input_data.pressed:
+                # Añadir input al buffer
+                self.player.input_buffer.add_input("jump")
+                # Intentar ejecutar inmediatamente
+                if self.player.handle_buffered_input("jump", pygame.time.get_ticks()):
+                    new_state = "jump"
                         
-        elif input_id == "x" and not self.player.jumping and  self.player.horizontal_velocity == 0 and self.player.vertical_velocity == 0  and not self.player.current_state == "jump":
-            # print(self.player.horizontal_velocity)
-            random_attack = 1
-
-            # Validamos si no estamos atacando ya , si el player no se encuentra atacando entonces comienza el ataque en combo
-            if not self.player.attacking:
-                new_state = "attack"
-                self.player.attacking = True
-                self.player.current_frame = 0
-                self.player.combo_timer = 0
-                settings.SOUNDS[f"slash{random_attack}"].stop()
-                settings.SOUNDS[f"slash{random_attack}"].play()
-                
-
-            # Si ya estamos atacando , verifica que combo se esta ejecutando actualmente y actua en consecuencia
-            # Solo tenemos 4 movimiento distintos es decir combos de x4
-            elif self.player.attacking:  
-                
-                # Almacenamos que frame es el del combo actual que se va a ejecutar
-                current_attack_frames = self.player.attack_moveset[
-                    f"attack{self.player.current_combo}"
-                ]
-                
-                # Verificar si estamos en el último frame o cerca del final, si esta en el ultimo reiniciamos el combo y volvemos a la animacion de attack1
-                # Permitir un poco antes del final
-                if self.player.current_frame >= len(current_attack_frames) - 2:
-                    if self.player.current_combo < self.player.max_combo:
-                        self.player.current_combo += 1
-                    else:
-                        self.player.current_combo = 1
-                    
-                    settings.SOUNDS[f"slash{random_attack}"].stop()
-                    settings.SOUNDS[f"slash{random_attack}"].play()
-                    
-                    self.player.current_frame = 0
-                    self.player.combo_timer = 0
+        # Sistema de ataques mejorado con detección de primer tick
+        elif input_id == "x":
+            if input_data.pressed:
+                # Solo detectar el primer tick, no mantener presionado
+                if self.handle_attack_input():
+                    new_state = "attack"
         
         # Verifica si se cambio la animacion del jugador  , si ocurre esto se reinicia el timer de la animacion y empieza la siguiente animacion            
         if new_state != self.player.current_state:
@@ -422,17 +405,18 @@ class PlayState(BaseState):
                     self.state_machine.change("outro")
               
         # Verificar si el jefe final ha sido derrotado
+        if self.current_level_index == 2:
         # if self.current_level_index == len(self.available_levels) - 1: 
-        #     boss_defeated = True
-        #     for enemy in self.enemies:
-        #         if enemy.name == "Minotaur" and enemy.current_health > 0: 
-        #             boss_defeated = False
-        #             break
+            boss_defeated = True
+            for enemy in self.enemies:
+                if enemy.name == "Minotaur" and enemy.current_health > 0: 
+                    boss_defeated = False
+                    break
             
-        #     if boss_defeated and not self.fade_out:
-        #         self.fade_out = True
-        #         self.fade_out_reason = "victory"
-        #         self.fade_alpha = 0
+            if boss_defeated and not self.fade_out:
+                self.fade_out = True
+                self.fade_out_reason = "victory"
+                self.fade_alpha = 0
         
 
 
@@ -492,13 +476,22 @@ class PlayState(BaseState):
                     self.animated_items.remove(animated_item)  # Eliminar la llave
                     self.player.has_key = True
   
-        # Actualizar enemigos
+        # Actualizar enemigos y limpiar los muertos
+        enemies_to_remove = []
         for enemy in self.enemies:
             # Obtener solidos cercanos para cada enemigo
             enemy_query_rect = enemy.rect.inflate(500, 500) 
             nearby_solid_data_enemy = self.collision_quadtree.query(enemy_query_rect)
             solid_objects_for_enemy = [data['rect'] for data in nearby_solid_data_enemy if data['type'] == "solid"]
-            enemy.update(delta_time, self.player, solid_objects_for_enemy) 
+            enemy.update(delta_time, self.player, solid_objects_for_enemy)
+            
+            # Marcar enemigos muertos para eliminación
+            if enemy.is_dead and enemy.death_animation_completed:
+                enemies_to_remove.append(enemy)
+        
+        # Eliminar enemigos muertos para evitar memory leaks
+        for enemy in enemies_to_remove:
+            self.enemies.remove(enemy) 
             
         # Actualiza la posicion de la camara
         self.camera.update(self.player.camera_rect, None)   
@@ -576,14 +569,14 @@ class PlayState(BaseState):
         # DRAW PARA DEBUGS
 
         #Dibujar los objetos sólidos
-        # for solid in self.solid_objects:
-        #     rect_with_offset = pygame.Rect(
-        #         solid.x - self.camera.offset_x,
-        #         solid.y - self.camera.offset_y,
-        #         solid.width,
-        #         solid.height
-        #     )
-        #     pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
+        for solid in self.solid_objects:
+            rect_with_offset = pygame.Rect(
+                solid.x - self.camera.offset_x,
+                solid.y - self.camera.offset_y,
+                solid.width,
+                solid.height
+            )
+            pygame.draw.rect(surface, (255, 0, 0), rect_with_offset, 2)
         
         # Debug info
         # debug_info = f"Camera: ({self.camera.offset_x}, {self.camera.offset_y})"
@@ -622,4 +615,49 @@ class PlayState(BaseState):
         surface.blit(text, text_rect)
 
         return surface
+    
+    # Método para manejar inputs de ataque con detección de primer tick
+    def handle_attack_input(self):
+        """Maneja inputs de ataque detectando solo el primer tick."""
+        if self.player.is_dead or self.player.hurt:
+            return False
+            
+        # Si no está atacando, iniciar nuevo ataque
+        if not self.player.attacking:
+            # Iniciar nuevo combo
+            self.player.attacking = True
+            self.player.current_combo = 1
+            self.player.current_frame = 0
+            self.player.combo_timer = 0
+            
+            # Reproducir sonido de ataque
+            random_attack = 1
+            settings.SOUNDS[f"slash{random_attack}"].stop()
+            settings.SOUNDS[f"slash{random_attack}"].play()
+            
+            return True
+        else:
+            # Si ya está atacando, verificar si se puede continuar el combo
+            attack_frames = self.player.attack_moveset[f"attack{self.player.current_combo}"]
+            
+            # Verificar si estamos cerca del final del ataque actual
+            if self.player.current_frame >= len(attack_frames) - 2:
+                # Avanzar al siguiente combo
+                if self.player.current_combo < self.player.max_combo:
+                    self.player.current_combo += 1
+                else:
+                    self.player.current_combo = 1
+                
+                self.player.current_frame = 0
+                self.player.combo_timer = 0
+                
+                # Reproducir sonido de ataque
+                random_attack = 1
+                settings.SOUNDS[f"slash{random_attack}"].stop()
+                settings.SOUNDS[f"slash{random_attack}"].play()
+                
+                return True
+            else:
+                # No se puede continuar el combo aún
+                return False
         

@@ -2,6 +2,8 @@ import pygame
 import settings
 from src.globalUtilsFunctions import update_vertical_acceleration , extract_animation_complex_spritesheet
 from src.globalUtilsFunctions import extract_animation_moveset , extract_animation_unique_spritesheet
+from src.SmoothMovement import SmoothMovement, EasingFunctions, AnimationSmoother
+from src.InputBuffer import InputBuffer, ComboSystem, AttackCancelSystem
 import settings
 
 
@@ -9,6 +11,9 @@ class Player:
     
     def __init__(self, x, y):
 
+        # Variable para optimizar choque de offset con el piso al saltar dependiendo del renderizado de la pantalla
+        self.jump_offset = 1.06
+            
         # Variables para la animación de muerte
         self.death_animation_completed = False
         self.death_animation_timer = 0
@@ -44,6 +49,19 @@ class Player:
         self.attack_recovery_timer = 0
         self.in_attack_recovery = False
         self.in_attack_windup = False
+        
+        # Sistemas mejorados de movimiento y combate
+        self.smooth_movement = SmoothMovement()
+        self.input_buffer = InputBuffer(buffer_time=200)
+        self.combo_system = ComboSystem(max_combo_time=800)
+        self.attack_cancel = AttackCancelSystem()
+        self.animation_smoother = AnimationSmoother()
+        
+        # Variables para movimiento suavizado
+        self.velocity_smooth_x = 0
+        self.velocity_smooth_y = 0
+        self.target_velocity_x = 0
+        self.target_velocity_y = 0
 
         # Inicalizamos todas las variabales que usara nuestro jugadorsito
         
@@ -83,6 +101,9 @@ class Player:
         # Aqui guardaremos igualmente los diferentes comportamientos de nuestro jugador, recordemos que estos objetos son usados para saber que frame y animacion usaremos para cada estado
         self.animations = {"run": [], "attack": [], "jump": [], "idle": []}
         
+        # scale_factor = settings.SCALE_FACTOR 
+        self.scale_factor = settings.SCALE_FACTOR 
+        
         # Y esta belleza es la que le asigna las animaciones a tanto los moveset como las animaciones
         self.load_animations()
         
@@ -102,13 +123,21 @@ class Player:
         self.on_ground = True
         self.horizontal_velocity = 0
         
-        scale_factor = settings.SCALE_FACTOR
-        self.scale_factor = settings.SCALE_FACTOR
 
-        # Calcula el nuevo offset en Y para centrar el rectángulo con el sprite escalado
-        # Suponiendo que el sprite original y el rectángulo estaban alineados antes del escalado:
-        self.rect_offset_x = 35  # Puedes ajustar este valor si el rectángulo no está centrado horizontalmente
-        self.rect_offset_y = int(-10 * scale_factor)  # Ajusta el offset vertical según el escalado
+
+
+        # if self.jump_offset == 1.06:
+        #     self.scale_factor = 1.4
+        # else:
+        #     print("entro en condicion de escala 1")
+        #     self.scale_factor = 1
+            
+        # Sistema de offsets ajustables para colisiones
+        # Puedes ajustar estos valores manualmente para cada dirección
+        self.rect_offset_x = 35  # Offset base (ajustable manualmente)
+        self.rect_offset_x_right = 40   # Offset para dirección derecha (ajustable) 
+        self.rect_offset_x_left = 40    # Offset para dirección izquierda (ajustable)
+        self.rect_offset_y = int(-10 * self.scale_factor)  # Ajusta el offset vertical según el escalado
 
         # Aqui ya le agrego la posicion inicial del rectangulo teniendo en cuenta la del player + el offset de control solo para que se vea bonito y sea coherente
         self.pos_player_rectX = self.x + self.rect_offset_x
@@ -135,6 +164,10 @@ class Player:
         
         # Cargar animacion de muerte
         self.load_death_animation()
+        
+        # Inicializar sistema de movimiento suavizado
+        self.smooth_movement.reset(self.x, self.y)
+        
 
     # Verificador de colisiones con el mundo
     def check_collision(self, solid_objects:pygame.Rect):
@@ -163,7 +196,9 @@ class Player:
                 # Colision desde abajo (saltando)
                 elif min_dist == dist_bottom and self.vertical_velocity < 0:
                     print("colision techo")
-                    self.y = solid.bottom * 1.05
+                    print("ESCALA: ",self.scale_factor)
+                    print("jump_offset: ",self.jump_offset)
+                    self.y = solid.bottom * self.jump_offset
                     self.vertical_velocity = 0
 
                 # Colision desde la derecha
@@ -176,7 +211,7 @@ class Player:
                 elif min_dist == dist_right and self.direction == -1:
                     print("colision por la izquierda del personaje")
                     self.horizontal_velocity = 0
-                    self.x = solid.right - self.base_rect_width - self.rect_offset_x * 1.2 + 1
+                    self.x = solid.right - self.base_rect_width - self.rect_offset_x * 1.5
        
     # Logica para cuando recibe un golpe             
     def receive_hit(self, direction, damage):
@@ -205,6 +240,18 @@ class Player:
 
     # Metodo update donde actualiza los estados del player y verifica que cambios se hicieron en el 
     def update(self,delta_time,solid_objects):   
+        # Verificar delta_time para evitar divisiones por cero
+        if delta_time <= 0:
+            return
+            
+        # Guardar objetos sólidos para knockback con colisiones
+        self.current_solid_objects = solid_objects
+        
+        # Actualizar sistemas mejorados
+        current_time = pygame.time.get_ticks()
+        self.combo_system.update(current_time)
+        self.input_buffer.cleanup_expired_inputs(current_time)
+        
         # Aumentamos el tiempo de la animacion y el tiempo del combo 
         self.animation_timer += delta_time 
         
@@ -238,8 +285,8 @@ class Player:
             if pygame.time.get_ticks() - self.invulnerable_timer > self.invulnerable_duration:
                 self.invulnerable = False
 
-        # Siempre podra moverse en x , para que se desplace saltando y atacando tambien
-        self.x += self.horizontal_velocity * delta_time / 1000
+        # Aplicar movimiento suavizado horizontal
+        self.apply_smooth_movement(delta_time)
         
         # Aplicamos la logica de aceleracion vertical y caida libre para el salto
         self.vertical_velocity, self.y, self.jumping , self.current_state = update_vertical_acceleration(
@@ -277,16 +324,12 @@ class Player:
         elif self.current_state == "run" and self.horizontal_velocity == 0 and self.on_ground: 
             self.current_state = "idle"       
 
-        # if self.vertical_velocity > 0 and not self.on_ground :
-        #      self.current_frame = 4
 
         # Current delay es para saber cuanto tiempo tiene que pasar para que se cambie el frame de la animacion       
         current_delay = settings.ANIMATIONS_DELAYS[self.current_state] 
 
-        # Actualizar animacion
-        if self.animation_timer >= current_delay:
-            self.update_animation()
-            self.animation_timer = 0
+        # Actualizar animacion con sistema suavizado
+        self.update_smooth_animation(delta_time, current_delay)
 
         if self.attacking:
             self.combo_timer += delta_time
@@ -306,11 +349,12 @@ class Player:
         rect_width = self.attack_rect_width if self.attacking else self.base_rect_width
         
         # Actualizar posicion del rectangulo de colisión
-        if self.direction == 1:
-            rect_x = self.x + self.rect_offset_x * 2 
-        else:
+        # Usar offsets separados para cada dirección (ajustables manualmente)
+        if self.direction == 1:  # Dirección derecha
+            rect_x = self.x + self.rect_offset_x_right * 2 
+        else:  # Dirección izquierda
             # correccion para que el rectangulo crezca a la izquierda
-            rect_x = self.x + (self.rect_offset_x * 2 - rect_width) + 11
+            rect_x = self.x + (self.rect_offset_x_left * 2 - rect_width) + 11
         
         # Crea el nuevo rectangulo de colision para el player (hay que actualizarlo cada vez que se mueve el player)  
         self.king_rect = pygame.Rect(
@@ -389,40 +433,180 @@ class Player:
         self.render_health_bar(x,y_render,screen)
         
    
-        # # Dibujar el rectangulo de colision
-        # rect_draw_x = self.king_rect.x
-        # rect_draw_y = self.king_rect.y
-        # if camera_offset:
-        #     rect_draw_x = self.king_rect.x - self.x + x
-        #     rect_draw_y = self.king_rect.y - self.y + y
-        # pygame.draw.rect(
-        #     screen,
-        #     (255, 0, 0),  # Color rojo
-        #     pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
-        #     2,  # Grosor de la línea
-        # )
-        #  # Dibujar información de debug
-        # debug_info = f"Estado: {self.current_state} Combo: {self.current_combo} Frame: {self.current_frame}"
-        # font = pygame.font.Font(None, 36)
-        # text = font.render(debug_info, True, (255, 255, 255))
-        # screen.blit(text, (10, 10))
-    
-    
-    
-    
-    
-    
+        # Dibujar el rectangulo de colision
+        rect_draw_x = self.king_rect.x
+        rect_draw_y = self.king_rect.y
+        if camera_offset:
+            rect_draw_x = self.king_rect.x - self.x + x
+            rect_draw_y = self.king_rect.y - self.y + y
+        pygame.draw.rect(
+            screen,
+            (255, 0, 0),  # Color rojo
+            pygame.Rect(rect_draw_x, rect_draw_y, self.king_rect.width, self.king_rect.height),
+            2,  # Grosor de la línea
+        )
+         # Dibujar información de debug
+        debug_info = f"Estado: {self.current_state} Combo: {self.current_combo} Frame: {self.current_frame}"
+        font = pygame.font.Font(None, 36)
+        text = font.render(debug_info, True, (255, 255, 255))
+        screen.blit(text, (10, 10))
     
     
     # METODO AUXILIARES
+    
+    # Método para aplicar movimiento suavizado
+    def apply_smooth_movement(self, delta_time):
+        """Aplica movimiento suavizado horizontal."""
+        # Solo aplicar suavizado si no está herido (para knockback directo)
+        if not self.hurt:
+            # Aplicar suavizado gradual a la velocidad
+            target_velocity = self.horizontal_velocity
+            self.velocity_smooth_x += (target_velocity - self.velocity_smooth_x) * 0.3  # Factor de suavizado más rápido
+            
+            # Aplicar movimiento suavizado
+            self.x += self.velocity_smooth_x * delta_time / 1000
+        else:
+            # Durante knockback, usar movimiento directo pero con colisiones
+            self.apply_knockback_with_collisions(delta_time)
+    
+    # Método para actualizar animaciones con suavizado
+    def update_smooth_animation(self, delta_time, current_delay):
+        """Actualiza las animaciones con sistema suavizado."""
+        if self.attacking:
+            # Para ataques, usar el sistema de combos mejorado
+            attack_frames = self.attack_moveset[f"attack{self.current_combo}"]
+            total_frames = len(attack_frames)
+            
+            # Usar delay específico del combo
+            combo_delay = settings.ANIMATIONS_DELAYS[f"attack{self.current_combo}"]
+            
+            if self.animation_timer >= combo_delay:
+                if self.current_frame >= total_frames - 1:
+                    self.reset_attack()
+                else:
+                    self.current_frame += 1
+                self.animation_timer = 0
+        else:
+            # Para animaciones normales, usar sistema suavizado
+            total_frames = len(self.animations[self.current_state])
+            self.animation_smoother.update(delta_time, total_frames, current_delay)
+            
+            if self.animation_timer >= current_delay:
+                self.current_frame = (self.current_frame + 1) % total_frames
+                self.animation_timer = 0
+    
+    # Método para manejar inputs con buffer
+    def handle_buffered_input(self, input_type, current_time):
+        """Maneja inputs con sistema de buffer."""
+        if input_type == "attack":
+            return self.handle_attack_input_buffered(current_time)
+        elif input_type == "jump":
+            return self.handle_jump_input_buffered()
+        return False
+    
+    # Método mejorado para manejar ataques con buffer
+    def handle_attack_input_buffered(self, current_time):
+        """Maneja inputs de ataque con sistema de buffer mejorado."""
+        if self.is_dead or self.hurt:
+            return False
+            
+        # Si no está atacando, iniciar nuevo ataque
+        if not self.attacking:
+            # Iniciar nuevo combo
+            self.attacking = True
+            self.current_combo = 1
+            self.current_frame = 0
+            self.combo_timer = 0
+            self.combo_system.add_attack_input(current_time)
+            
+            # Reproducir sonido de ataque
+            random_attack = 1
+            settings.SOUNDS[f"slash{random_attack}"].stop()
+            settings.SOUNDS[f"slash{random_attack}"].play()
+            
+            return True
+        else:
+            # Si ya está atacando, verificar si se puede continuar el combo
+            attack_frames = self.attack_moveset[f"attack{self.current_combo}"]
+            
+            # Verificar si estamos cerca del final del ataque actual
+            if self.current_frame >= len(attack_frames) - 2:
+                # Avanzar al siguiente combo
+                if self.current_combo < self.max_combo:
+                    self.current_combo += 1
+                else:
+                    self.current_combo = 1
+                
+                self.current_frame = 0
+                self.combo_timer = 0
+                
+                # Reproducir sonido de ataque
+                random_attack = 1
+                settings.SOUNDS[f"slash{random_attack}"].stop()
+                settings.SOUNDS[f"slash{random_attack}"].play()
+                
+                return True
+            else:
+                # No se puede continuar el combo aún
+                return False
+    
+    # Método mejorado para manejar saltos con buffer
+    def handle_jump_input_buffered(self):
+        """Maneja inputs de salto con sistema de buffer."""
+        if self.is_dead or self.hurt or not self.on_ground:
+            return False
+            
+        # Verificar si se puede cancelar el ataque actual para saltar
+        if self.attacking:
+            attack_type = f"attack{self.current_combo}"
+            if (self.attack_cancel.can_cancel_attack(attack_type, self.current_frame) and 
+                self.attack_cancel.can_cancel_to_state("jump")):
+                # Cancelar ataque y saltar
+                self.reset_attack()
+            else:
+                return False
+        
+        # Ejecutar salto
+        self.jumping = True
+        self.current_state = "jump"
+        self.vertical_velocity = settings.PLAYER_SPEED_JUMP
+        self.current_combo = 1
+        self.current_frame = 0
+        self.attacking = False
+        
+        return True
+    
+    # Método para aplicar knockback con detección de colisiones
+    def apply_knockback_with_collisions(self, delta_time):
+        """Aplica knockback con detección de colisiones para evitar atravesar objetos."""
+        knockback_distance = self.knockback_direction * self.knockback_speed * (delta_time / 1000)
+        
+        # Crear rectángulo temporal para verificar colisión
+        temp_rect = self.king_rect.copy()
+        temp_rect.x += knockback_distance
+        
+        # Verificar colisiones antes de aplicar movimiento
+        collision_detected = False
+        for solid in self.current_solid_objects if hasattr(self, 'current_solid_objects') else []:
+            if temp_rect.colliderect(solid):
+                collision_detected = True
+                break
+        
+        # Solo aplicar knockback si no hay colisión
+        if not collision_detected:
+            self.x += knockback_distance
+        else:
+            # Si hay colisión, detener el knockback
+            self.hurt = False
+            self.current_state = "idle"
+            self.current_frame = 0
 
     # Metodo para cargar las animaciones del jugador, aqui esta la logica donde se cargan los spritesheets y se asignan a cada animacion
     def load_animations(self):
         
         # Cargar spritesheets del king en un array para automatizar las animaciones
         # cabe destacar que esta configurado para trabajar correctamente con 4 frames los ataques
-        scale_factor = settings.SCALE_FACTOR
-        
+       
         # Recorremos los spritesheets y los frames para asignar las animaciones a cada uno de ellos
         # Este metodo es importante ya que asi recorremos el spritesheet y le asignamos los frames a cada animacion , dependiendo del tamaño del frame sera los sprites que saque
         # Por ejemplo si el frame es de 64x64 y el spritesheet tiene 4 frames de 64x64 entonces el resultado sera 4 sprites distintos
@@ -431,28 +615,28 @@ class Player:
 
 
         # Cargar la animacion de jump, esta en un solo spritesheet
-        player_spritesheet = extract_animation_unique_spritesheet("Player","Jump",scale_factor)
+        player_spritesheet = extract_animation_unique_spritesheet("Player","Jump",self.scale_factor)
         initial_sprite = 0
         sprite_moveset_size = 8
         self.animations["jump"] = extract_animation_moveset(player_spritesheet, (initial_sprite, sprite_moveset_size))
 
         # Cargar la animacion de run, esta en un solo spritesheet
-        player_spritesheet = extract_animation_unique_spritesheet("Player","Run",scale_factor)
+        player_spritesheet = extract_animation_unique_spritesheet("Player","Run",self.scale_factor)
         initial_sprite = 0
         sprite_moveset_size = 8
         self.animations["run"] = extract_animation_moveset(player_spritesheet, (initial_sprite, sprite_moveset_size))
 
         # Cargar la animacion de idle, esta en un solo spritesheet
-        player_spritesheet = extract_animation_unique_spritesheet("Player","Idle",scale_factor)
+        player_spritesheet = extract_animation_unique_spritesheet("Player","Idle",self.scale_factor)
         initial_sprite = 0
         sprite_moveset_size = 8
         self.animations["idle"] = extract_animation_moveset(player_spritesheet, (initial_sprite, sprite_moveset_size))
 
         # Cargar las animaciones de ataque, todas las animaciones de ataque estan en un solo spritesheet
-        attack_spritesheet = extract_animation_unique_spritesheet("Player","Attack",scale_factor)
+        attack_spritesheet = extract_animation_unique_spritesheet("Player","Attack",self.scale_factor)
 
         # Cargar el primer ataque, el cual es el que se usa para el combo 1 5 sprites
-        initial_sprite = 0
+        initial_sprite = 2
         sprite_moveset_size = 5
         self.attack_moveset["attack1"] = extract_animation_moveset(attack_spritesheet,(initial_sprite,sprite_moveset_size))  
         
@@ -564,9 +748,9 @@ class Player:
         health_bar_height = 6
         health_ratio = self.current_health / self.max_health
         # Fondo de la barra (rojo)
-        pygame.draw.rect(screen, (255, 0, 0), 
-                        (bar_x, bar_y, health_bar_width, health_bar_height))
+        # pygame.draw.rect(screen, (255, 0, 0), 
+        #                 (bar_x, bar_y, health_bar_width, health_bar_height))
         
-        # Vida actual (verde)
-        pygame.draw.rect(screen, (0, 255, 0), 
-                        (bar_x, bar_y, health_bar_width * health_ratio, health_bar_height))
+        # # Vida actual (verde)
+        # pygame.draw.rect(screen, (0, 255, 0), 
+        #                 (bar_x, bar_y, health_bar_width * health_ratio, health_bar_height))

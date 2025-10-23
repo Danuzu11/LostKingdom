@@ -11,11 +11,12 @@ class Enemy:
         self.death_animation_completed = False
         self.death_animation_timer = 0
         self.start_death = False
+        
         # TENGAMOS EN CUENTA QUE PARA AGREGAR MAS ENEMIGOS DEBEMOS AGREGAR LA DEFINICIONES EN ENEMIES.PY
         # ESTO PARA DEFINIR SUS VALORES DE VIDA ESCALA Y CORRECIONES DE POSICION
           
         # Coldown de persecucioon
-        self.pursuit_cooldown = 1000  # 1seg
+        self.pursuit_cooldown = 100  # 1seg
         self.last_pursuit_time = 0 
         self.attacking_animation_started = False
         
@@ -23,6 +24,7 @@ class Enemy:
         self.name = name
         self.velocity = Enemies[self.name]["speed"]
         self.scale_factor = Enemies[self.name]["scale_factor"]
+        
         # Variable para correguir su posicion de piso (por el escalado se mueven las cosas en el mapa)
         self.floor_correct = Enemies[self.name]["floor_correct"]
         
@@ -46,7 +48,7 @@ class Enemy:
         self.invulnerable_timer = 0
         self.hurt_timer = 0
         self.hurt_duration = 500  # ms
-        self.invulnerable_duration = 1000  # ms
+        self.invulnerable_duration = 500  # ms
         self.knockback_speed = 200 
         self.hurt_frame = 0  # Frame de herido
     
@@ -71,10 +73,6 @@ class Enemy:
         # Animaciones (solo un ataque)
         self.animations = {"run": [], "attack": [], "idle": []}
         self.load_animations()
-        
-        
-        # self.scale_factor = 0
-
         
         # Aqui empiezan los ajustes para centrar el rectangulo de colision con el sprite y su ancho
         # Rectangulo de colision y offset 
@@ -108,6 +106,7 @@ class Enemy:
         )
         
         self.initial_x = self.x
+        
         # Variables para el control de caida de los enemigos
         self.on_ground = True
         self.waiting = False
@@ -118,7 +117,7 @@ class Enemy:
     def check_attack_player(self, player):
         if self.rect.colliderect(player.king_rect):
             # Si el enemigo ataca y el jugador no es invulnerable ni está herido
-            if self.attacking and not player.invulnerable and not player.hurt:
+            if self.attacking:
                 player.receive_hit(-1 if player.x < self.x else 1,self.attack_damage)
                 self.last_pursuit_time = pygame.time.get_ticks()  # Espera antes de volver a perseguir
     
@@ -166,6 +165,7 @@ class Enemy:
 
             # Restarle el daño al enemigo
             self.current_health -= damage
+            
             # Verificar si el enemigo muere
             if self.current_health <= 0:
                 self.is_dead = True
@@ -314,9 +314,7 @@ class Enemy:
             sprite_moveset_size = 13
             enemy_animations = extract_animation_complex_spritesheet(self.name,self.scale_factor)
             self.animations["death"] = extract_animation_moveset(enemy_animations, (initial_sprite, sprite_moveset_size))
-        
-
-                    
+                        
     # Actualiza el rectangulo de colision
     def update_rect(self):
   
@@ -352,6 +350,7 @@ class Enemy:
     # Aplica el knockback al enemigo, que basicamente es un desplazamiento en la direccion opuesta al golpe
     # Y ademas de esto verifica si el enemigo colisiona con el mundo y no se mueve si colisiona
     def apply_knockback(self, delta_time, solid_objects):
+        
         # Calcula el desplazamiento de knockback
         knockback_distance = self.knockback_direction * self.knockback_speed * (delta_time / 1000)
 
@@ -359,18 +358,17 @@ class Enemy:
         has_ground = self.check_ground(solid_objects)
         if has_ground == False:
             return
+        
         # Verifica colisión con el mundo
         for solid in solid_objects:
             if self.rect.colliderect(solid):
                 return  # No aplicar knockback si colisiona
+            
         self.x += knockback_distance
         self.update_rect()
     
     # Verifica si hay piso enfrente del enemigo    
     def check_ground(self, solid_objects):
-        """
-        Verifica si hay piso en la dirección del movimiento del enemigo
-        """
         # Crear un rectángulo de detección adelante del enemigo en la dirección de movimiento
         ground_check = pygame.Rect(
             self.rect.x + ((self.rect.width + 10) * self.direction)  ,  # Posicion adelante en la dirección de movimiento
@@ -436,23 +434,24 @@ class Enemy:
 
             self.update_rect() # Actualizar rect por si el knockback cambió x
             
-            if self.current_state != "idle": # Usamos el frame de 'idle' para mostrar cuando lo hieren
-                self.current_state = "idle"
-                self.current_frame = 0
-                self.animation_timer = 0
+            # if self.current_state != "idle": # Usamos el frame de 'idle' para mostrar cuando lo hieren
+            #     self.current_state = "idle"
+            #     self.current_frame = 0
+            #     self.animation_timer = 0
             
-            self.update_animation(delta_time) # Solo para que la anim de idle/hurt avance
-            return
+            # self.update_animation(delta_time) # Solo para que la anim de idle/hurt avance
+            # return
+        
         if self.invulnerable:
             if pygame.time.get_ticks() - self.invulnerable_timer > self.invulnerable_duration:
                 self.invulnerable = False
                 
         # Logica de colision de ataque
-        if not self.hurt and not player.hurt:
+        if not player.hurt:
             if self.rect.colliderect(player.king_rect):
                 if player.attacking and not self.attacking:
                     self.receive_hit(-1 if self.x < player.x else 1, player.attack_damage)
-                elif self.attacking and player.attacking:
+                elif (self.attacking and player.attacking) or (self.attacking and not player.attacking):
                     player.receive_hit(-1 if player.x < self.x else 1, self.attack_damage)
                     
         # Si no hay piso, solo detener el movimiento horizontal
@@ -617,13 +616,13 @@ class Enemy:
         
         # # AREA DE DEBUG 
         # Dibujar el rectangulo de colision 
-        # rect_to_draw = pygame.Rect(
-        #     self.rect.x - offset[0],
-        #     self.rect.y - offset[1],
-        #     self.rect.width,
-        #     self.rect.height,
-        # )
-        # pygame.draw.rect(screen, (255, 0, 0), rect_to_draw, 2)
+        rect_to_draw = pygame.Rect(
+            self.rect.x - offset[0],
+            self.rect.y - offset[1],
+            self.rect.width,
+            self.rect.height,
+        )
+        pygame.draw.rect(screen, (255, 0, 0), rect_to_draw, 2)
         
         # Dibujar el rectángulo de deteccion de suelo
         # ground_check = pygame.Rect(

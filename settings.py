@@ -57,8 +57,8 @@ BASE_DIR = pathlib.Path(__file__).parent
 SCALE_FACTOR = 1.3
 
 # Configuración del jugador
-PLAYER_SPEED = 200
-PLAYER_SPEED_JUMP = -7.8
+PLAYER_SPEED = 210
+PLAYER_SPEED_JUMP = -8
 
 # Velocidad de los enemigos
 ENEMY_SPEED = 115
@@ -97,6 +97,7 @@ SOUNDS = {
     "menu_theme1": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "CursedCitadel(Intro).wav"),
     "principal_theme": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "smoothMedieval.mp3"),
     "maquinaescribir": pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "maquinaescribir.mp3"),
+    "relaxtheme" : pygame.mixer.Sound(BASE_DIR / "assets" / "sounds" / "lugiaSong.mp3"),
 }
 
 # Sonidos de muerte de los enemigos
@@ -110,8 +111,10 @@ DEATH_SOUNDS = {
 
 # Texturas, frames y estructura para objetos estaticos
 STATIC_TEXTURES = {
-    "DoorClosed": pygame.image.load(BASE_DIR / "assets" / "textures" / "Decorations" / "door.png"),
-    "DoorOpen": pygame.image.load(BASE_DIR / "assets" / "textures" / "Decorations" / "doorOpen.png"),
+    # "DoorClosed": pygame.image.load(BASE_DIR / "assets" / "textures" / "Decorations" / "door.png"),
+    # "DoorOpen": pygame.image.load(BASE_DIR / "assets" / "textures" / "Decorations" / "doorOpen.png"),
+    "DoorClosed": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "Decorations" / "door.png"),(80,115)),
+    "DoorOpen": pygame.transform.scale(pygame.image.load(BASE_DIR / "assets" / "textures" / "Decorations" / "doorOpen.png"),(80,115))
 }
 
 STATIC_FRAMES = {
@@ -123,14 +126,14 @@ STATIC_DECORATIONS = {
     "DoorClosed": {
         "texture": STATIC_TEXTURES["DoorClosed"],
         "frames": STATIC_FRAMES["DoorClosed"],
-        "correctionX": 20,
-        "correctionY": 54,
+        "correctionX": 25,
+        "correctionY": 112,
     },
     "DoorOpen": {
         "texture": STATIC_TEXTURES["DoorOpen"],
         "frames": STATIC_FRAMES["DoorOpen"],
-        "correctionX": 20,
-        "correctionY": 54,
+        "correctionX": 25,
+        "correctionY": 112,
     },
 }
 
@@ -272,17 +275,17 @@ FRAMES = {
     "key": frames.generate_frames(TEXTURES["key"], 31, 31),
 }
 
-# Tiempos de restraso de animacion de los jugadores , a mayor tiempo mayor valor , mayor retraso de animacion (va mas lento)
+# Tiempos de restraso de animacion de los jugadores optimizados para mayor fluidez
 ANIMATIONS_DELAYS = {
-    "run": 100, 
-    "attack": 120, 
-    "jump": 190, 
-    "idle": 120,
-    "death": 400,
-    "attack1": 40,  # Delay para el primer ataque (más rápido)
-    "attack2": 50, # Delay para el segundo ataque
-    "attack3": 60, # Delay para el tercer ataque
-    "attack4": 100, # Delay para el cuarto ataque (más lento)
+    "run": 80,      # Más rápido para movimiento fluido
+    "attack": 100,  # Consistente para todos los ataques base
+    "jump": 120,    # Más rápido para salto responsivo
+    "idle": 150,    # Más lento para calma visual
+    "death": 400,   # Mantener lento para dramatismo
+    "attack1": 60,  # Más lento para fluidez (era 40)
+    "attack2": 70,  # Progresión natural (era 50)
+    "attack3": 80,  # Progresión natural (era 60)
+    "attack4": 90,  # Más rápido para fluidez (era 100)
 }
 
 # Tiempos de restraso de animacion de los enemigos , a mayor tiempo mayor valor , mayor retraso de animacion (va mas lento)
