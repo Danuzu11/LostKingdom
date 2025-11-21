@@ -584,11 +584,11 @@ class PlayState(BaseState):
                 enemy.draw(surface, (self.camera.offset_x, self.camera.offset_y),self.player,self.solid_objects)
         
         # Debug: Mostrar información de enemigos
-        if len(self.visible_enemies) > 0:
-            debug_info = f"Enemigos visibles: {len(self.visible_enemies)}/{len(self.enemies)}"
-            font = pygame.font.Font(None, 24)
-            text = font.render(debug_info, True, (255, 255, 255))
-            surface.blit(text, (10, 10))
+        # if len(self.visible_enemies) > 0:
+        #     debug_info = f"Enemigos visibles: {len(self.visible_enemies)}/{len(self.enemies)}"
+        #     font = pygame.font.Font(None, 24)
+        #     text = font.render(debug_info, True, (255, 255, 255))
+        #     surface.blit(text, (10, 10))
             
                       
         # Dibujar al jugador

@@ -449,10 +449,10 @@ class Player:
         # )
 
          # Dibujar información de debug
-        debug_info = f"Estado: {self.current_state} Combo: {self.current_combo} Frame: {self.current_frame}"
-        font = pygame.font.Font(None, 36)
-        text = font.render(debug_info, True, (255, 255, 255))
-        screen.blit(text, (10, 10))
+        # debug_info = f"Estado: {self.current_state} Combo: {self.current_combo} Frame: {self.current_frame}"
+        # font = pygame.font.Font(None, 36)
+        # text = font.render(debug_info, True, (255, 255, 255))
+        # screen.blit(text, (10, 10))
     
     
     # METODO AUXILIARES
